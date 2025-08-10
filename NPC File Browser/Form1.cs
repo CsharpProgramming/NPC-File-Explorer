@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using System.IO;
-using System.Runtime.InteropServices;
+﻿using NPC_File_Browser;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Threading;
-using NPC_File_Browser;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Shapes;
 
 namespace NPC_File_Browser
 {
@@ -29,7 +31,7 @@ namespace NPC_File_Browser
         List<string> PathsClicked = new List<string>();
         string CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads";
         string LastPathClicked;
-        string PinnedFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Browser", "pinned_folders.txt");
+        string PinnedFilePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Browser", "pinned_folders.txt");
 
         private CancellationTokenSource _loadCancellationTokenSource;
         private readonly Dictionary<string, FileControl> _fileControls = new Dictionary<string, FileControl>();
@@ -193,7 +195,20 @@ namespace NPC_File_Browser
 
         private async void UpdateItems_FileDoubleClicked(object sender, string directory)
         {
-            await LoadItemsAsync(directory);
+            if (Directory.Exists(directory))
+            {
+                await LoadItemsAsync(directory);
+            }
+
+            else if (File.Exists(directory)) 
+            {
+                //stackoverflow.com/questions/11365984/c-sharp-open-file-with-default-application-and-parameters
+                Process fileopener = new Process();
+
+                fileopener.StartInfo.FileName = "explorer";
+                fileopener.StartInfo.Arguments = "\"" + directory + "\"";
+                fileopener.Start();
+            }
         }
 
         private async void ButtonReturn_Click(object sender, EventArgs e)
@@ -263,11 +278,11 @@ namespace NPC_File_Browser
                     {
                         if (File.Exists(path))
                         {
-                            File.Copy(path, Path.Combine(directory, Path.GetFileName(path)), overwrite: true);
+                            File.Copy(path, System.IO.Path.Combine(directory, System.IO.Path.GetFileName(path)), overwrite: true);
                         }
                         else if (Directory.Exists(path))
                         {
-                            Helper.Helper.CopyDirectory(path, Path.Combine(directory, Path.GetFileName(path)));
+                            Helper.Helper.CopyDirectory(path, System.IO.Path.Combine(directory, System.IO.Path.GetFileName(path)));
                         }
                     }
                     catch (Exception ex)
@@ -384,7 +399,7 @@ namespace NPC_File_Browser
                 {
                     if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path))
                     {
-                        string folderName = Path.GetFileName(path);
+                        string folderName = System.IO.Path.GetFileName(path);
                         if (string.IsNullOrEmpty(folderName))
                         {
                             folderName = path;
@@ -429,7 +444,7 @@ namespace NPC_File_Browser
 
         private void AddPinnedFolder(string folderPath)
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(PinnedFilePath));
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(PinnedFilePath));
 
             if (File.Exists(PinnedFilePath))
             {

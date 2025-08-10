@@ -63,10 +63,7 @@ namespace NPC_File_Browser
 
         private void FileControl_DoubleClick(object sender, EventArgs e)
         {
-            if (Icon.IconChar == FontAwesome.Sharp.IconChar.Folder)
-            {
-                FileDoubleClicked?.Invoke(this, FolderPath);
-            }
+            FileDoubleClicked?.Invoke(this, FolderPath);
         }
     }
 }
