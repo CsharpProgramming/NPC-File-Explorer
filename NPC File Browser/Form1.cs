@@ -358,10 +358,10 @@ namespace NPC_File_Browser
             SidebarPanel.Controls.Clear();
 
             //Add common folders
-            AddSidebarFile("Desktop", Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
-            AddSidebarFile("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads");
-            AddSidebarFile("Documents", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-            AddSidebarFile("Videos", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
+            AddSidebarFile("Desktop", Environment.GetFolderPath(Environment.SpecialFolder.Desktop), FontAwesome.Sharp.IconChar.Desktop);
+            AddSidebarFile("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads", FontAwesome.Sharp.IconChar.Download);
+            AddSidebarFile("Documents", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), FontAwesome.Sharp.IconChar.FilePdf);
+            AddSidebarFile("Videos", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos), FontAwesome.Sharp.IconChar.FileVideo);
 
             AddSideBarSeperator();
 
@@ -390,15 +390,15 @@ namespace NPC_File_Browser
                             folderName = path;
                         }
 
-                        AddSidebarFile(folderName, path);
+                        AddSidebarFile(folderName, path, FontAwesome.Sharp.IconChar.Folder);
                     }
                 }
             }
         }
 
-        private void AddSidebarFile(string folderName, string folderPath)
+        private void AddSidebarFile(string folderName, string folderPath, FontAwesome.Sharp.IconChar icon)
         {
-            SidebarFileControl SFC = new SidebarFileControl(folderName);
+            SidebarFileControl SFC = new SidebarFileControl(folderName, icon);
             SFC.FolderPath = folderPath;
             SFC.FileDoubleClicked += async (sender, path) => { await LoadItemsAsync(folderPath); };
             SidebarPanel.Controls.Add(SFC);

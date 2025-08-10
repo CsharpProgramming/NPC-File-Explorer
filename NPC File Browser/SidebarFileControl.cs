@@ -16,11 +16,12 @@ namespace NPC_File_Browser
         public string FolderPath { get; set; }
         public bool IsSelected { get; private set; } = false;
 
-        public SidebarFileControl(string fileName)
+        public SidebarFileControl(string fileName, FontAwesome.Sharp.IconChar icon)
         {
             InitializeComponent();
             FileNameLabel.Text = fileName;
             this.DoubleClick += SidebarFileControl_DoubleClick;
+            Icon.IconChar = icon;
         }
 
         private void SidebarFileControl_DoubleClick(object sender, EventArgs e)

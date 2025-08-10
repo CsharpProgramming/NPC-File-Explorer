@@ -9,8 +9,7 @@ namespace NPC_File_Browser.Helper
 {
     public static class Helper
     {
-        private static readonly ConcurrentDictionary<string, (long size, DateTime lastModified)> _sizeCache
-            = new ConcurrentDictionary<string, (long, DateTime)>();
+        private static readonly ConcurrentDictionary<string, (long size, DateTime lastModified)> _sizeCache = new ConcurrentDictionary<string, (long, DateTime)>();
 
         private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(5);
 
