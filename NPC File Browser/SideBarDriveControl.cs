@@ -56,10 +56,22 @@ namespace NPC_File_Browser
 
             bmp = new Bitmap(pbWIDTH, pbHEIGHT);
 
-            using (Graphics g = Graphics.FromImage(bmp))
+            if (percentage >= 85)
             {
-                g.Clear(Color.FromArgb(40, 40, 40));
-                g.FillRectangle(Brushes.DimGray, new Rectangle(0, 0, (int)(percentage * pbUnit), pbHEIGHT));
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    g.Clear(Color.FromArgb(40, 40, 40));
+                    g.FillRectangle(Brushes.IndianRed, new Rectangle(0, 0, (int)(percentage * pbUnit), pbHEIGHT));
+                }
+            }
+
+            else
+            {
+                using (Graphics g = Graphics.FromImage(bmp))
+                {
+                    g.Clear(Color.FromArgb(40, 40, 40));
+                    g.FillRectangle(Brushes.DimGray, new Rectangle(0, 0, (int)(percentage * pbUnit), pbHEIGHT));
+                }
             }
 
             pictureBox1.Image = bmp;
