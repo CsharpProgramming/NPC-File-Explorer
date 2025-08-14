@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPC File Browser", "NPC File Browser\NPC File Browser.csproj", "{40217186-D4CD-4063-AC9E-945D7568D728}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NPC File Explorer", "NPC File Browser\NPC File Explorer.csproj", "{40217186-D4CD-4063-AC9E-945D7568D728}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupProject", "SetupProject\SetupProject.vdproj", "{34AB757A-BA4F-F52C-C103-667695FDFA40}"
 EndProject
