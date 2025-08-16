@@ -84,9 +84,9 @@
             // 
             // SidebarPanel
             // 
-            this.SidebarPanel.Location = new System.Drawing.Point(7, 29);
+            this.SidebarPanel.Location = new System.Drawing.Point(7, 12);
             this.SidebarPanel.Name = "SidebarPanel";
-            this.SidebarPanel.Size = new System.Drawing.Size(236, 611);
+            this.SidebarPanel.Size = new System.Drawing.Size(236, 628);
             this.SidebarPanel.TabIndex = 0;
             // 
             // panel2
@@ -96,7 +96,7 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(1234, 60);
+            this.panel2.Size = new System.Drawing.Size(1234, 54);
             this.panel2.TabIndex = 1;
             // 
             // PathTextbox
@@ -105,7 +105,7 @@
             this.PathTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
             this.PathTextbox.BorderColor = System.Drawing.Color.Transparent;
             this.PathTextbox.BorderRadius = 10;
-            this.PathTextbox.Location = new System.Drawing.Point(260, 12);
+            this.PathTextbox.Location = new System.Drawing.Point(260, 9);
             this.PathTextbox.Multiline = false;
             this.PathTextbox.Name = "PathTextbox";
             this.PathTextbox.Padding = new System.Windows.Forms.Padding(10);
@@ -134,7 +134,7 @@
             this.panel3.Controls.Add(this.ButtonForward);
             this.panel3.Controls.Add(this.ButtonBack);
             this.panel3.Controls.Add(this.ButtonReturn);
-            this.panel3.Location = new System.Drawing.Point(250, 60);
+            this.panel3.Location = new System.Drawing.Point(250, 55);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(984, 40);
             this.panel3.TabIndex = 2;
@@ -374,9 +374,9 @@
             this.ContentPanel.AutoScroll = true;
             this.ContentPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
             this.ContentPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.ContentPanel.Location = new System.Drawing.Point(250, 100);
+            this.ContentPanel.Location = new System.Drawing.Point(250, 97);
             this.ContentPanel.Name = "ContentPanel";
-            this.ContentPanel.Size = new System.Drawing.Size(983, 550);
+            this.ContentPanel.Size = new System.Drawing.Size(983, 555);
             this.ContentPanel.TabIndex = 3;
             this.ContentPanel.WrapContents = false;
             // 

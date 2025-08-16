@@ -22,6 +22,17 @@ namespace NPC_File_Browser
             FileNameLabel.Text = "Drive " + drive;
 
             UpdateDiskSpace(drive); //New progress bar adapted from: dyclassroom.com/csharp-project/how-to-create-a-custom-progress-bar-in-csharp-using-visual-studio
+
+            DriveInfo info = new DriveInfo(drive);
+            if (info.DriveType == DriveType.Removable)
+            {
+                Icon.IconChar = FontAwesome.Sharp.IconChar.Usb;
+            }
+
+            else
+            {
+                Icon.IconChar = FontAwesome.Sharp.IconChar.Hdd;
+            }
         }
 
         private void FileNameLabel_DoubleClick(object sender, EventArgs e)
