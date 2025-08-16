@@ -32,6 +32,7 @@ namespace NPC_File_Browser
         string CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads";
         string LastPathClicked;
         string PinnedFilePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Browser", "pinned_folders.txt");
+        int itemCount = 0;
 
         private CancellationTokenSource _loadCancellationTokenSource;
         private readonly Dictionary<string, FileControl> _fileControls = new Dictionary<string, FileControl>();
@@ -75,7 +76,7 @@ namespace NPC_File_Browser
             PathTextbox.TextBoxText = CurrentPath;
             ContentPanel.Controls.Clear();
             _fileControls.Clear();
-            int itemCount = 0;
+            itemCount = 0;
 
             try
             {
@@ -178,6 +179,7 @@ namespace NPC_File_Browser
             if (PathsClicked.Contains(directory) == false)
             {
                 PathsClicked.Add(directory);
+                ItemCountLabel.Text = itemCount + " Items | " + PathsClicked.Count + " Selected";
                 LastPathClicked = directory;
 
                 UpdateStarButton();
@@ -241,7 +243,8 @@ namespace NPC_File_Browser
 
                 PathsClicked.Clear();
                 ButtonStar.IconFont = FontAwesome.Sharp.IconFont.Regular;
-                DisableUI();
+                ItemCountLabel.Text = itemCount + " Items";
+                DisableUI(); 
             }
 
             if (e.KeyCode == Keys.Enter && PathTextbox.TextBoxText != CurrentPath)
@@ -250,6 +253,31 @@ namespace NPC_File_Browser
                 {
                     await LoadItemsAsync(PathTextbox.TextBoxText);
                 }
+            }
+
+            if ((ModifierKeys & Keys.Control) == Keys.Control && e.KeyCode == Keys.A)
+            {
+                PathsClicked.Clear();
+
+                foreach (string path in Directory.GetDirectories(CurrentPath))
+                {
+                    PathsClicked.Add(path);
+                }
+
+                foreach (string file in Directory.GetFiles(CurrentPath))
+                {
+                    PathsClicked.Add(file);
+                }
+
+                foreach (Control control in ContentPanel.Controls)
+                {
+                    if (control is FileControl fileControl)
+                    {
+                        fileControl.Select();
+                    }
+                }
+
+                ItemCountLabel.Text = itemCount + " Items | " + PathsClicked.Count + " Selected";
             }
         }
 
