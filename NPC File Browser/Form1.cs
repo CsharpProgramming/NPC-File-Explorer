@@ -96,7 +96,7 @@ namespace NPC_File_Browser
                         extension = "File";
                     }
 
-                    AddItem(true, info.Name, Helper.Helper.ConvertedSize(Convert.ToDouble(info.Length)),
+                    AddItem(true, info.Name, Helper.Helper.ConvertedSize(Convert.ToDouble(info.Length), false),
                            extension, info.FullName);
                 }
 
@@ -134,11 +134,11 @@ namespace NPC_File_Browser
                 {
                     if (InvokeRequired)
                     {
-                        Invoke(new Action(() => fileControl.UpdateSize(Helper.Helper.ConvertedSize(size))));
+                        Invoke(new Action(() => fileControl.UpdateSize(Helper.Helper.ConvertedSize(size, false))));
                     }
                     else
                     {
-                        fileControl.UpdateSize(Helper.Helper.ConvertedSize(size));
+                        fileControl.UpdateSize(Helper.Helper.ConvertedSize(size, false));
                     }
                 }
             }
@@ -422,6 +422,7 @@ namespace NPC_File_Browser
         private void AddSidebarDrive(string drive)
         {
             SideBarDriveControl SDC = new SideBarDriveControl(drive);
+            SDC.FileDoubleClicked += async (sender, path) => { await LoadItemsAsync(drive + @"\"); };
             SidebarPanel.Controls.Add(SDC);
         }
 

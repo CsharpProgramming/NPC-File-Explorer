@@ -46,6 +46,7 @@
             this.FileNameLabel.Size = new System.Drawing.Size(57, 17);
             this.FileNameLabel.TabIndex = 5;
             this.FileNameLabel.Text = "Drive C:";
+            this.FileNameLabel.DoubleClick += new System.EventHandler(this.FileNameLabel_DoubleClick);
             // 
             // Icon
             // 
@@ -94,6 +95,7 @@
             this.Controls.Add(this.Icon);
             this.Name = "SideBarDriveControl";
             this.Size = new System.Drawing.Size(236, 50);
+            this.DoubleClick += new System.EventHandler(this.SideBarDriveControl_DoubleClick);
             ((System.ComponentModel.ISupportInitialize)(this.Icon)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);

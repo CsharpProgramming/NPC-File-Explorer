@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+
 namespace NPC_File_Browser
 {
     public partial class SideBarDriveControl : UserControl
@@ -16,6 +13,9 @@ namespace NPC_File_Browser
         int pbWIDTH, pbHEIGHT, pbComplete;
         Bitmap bmp;
         Graphics g;
+
+        public event EventHandler<string> FileDoubleClicked;
+
         public SideBarDriveControl(string drive)
         {
             InitializeComponent();
@@ -23,6 +23,17 @@ namespace NPC_File_Browser
 
             UpdateDiskSpace(drive); //New progress bar adapted from: dyclassroom.com/csharp-project/how-to-create-a-custom-progress-bar-in-csharp-using-visual-studio
         }
+
+        private void FileNameLabel_DoubleClick(object sender, EventArgs e)
+        {
+            FileDoubleClicked?.Invoke(this, FileNameLabel.Text.Replace("Drive", ""));
+        }
+
+        private void SideBarDriveControl_DoubleClick(object sender, EventArgs e)
+        {
+            FileDoubleClicked?.Invoke(this, FileNameLabel.Text.Replace("Drive", ""));
+        }
+
         private void UpdateDiskSpace(string drive)
         {
             try
@@ -44,7 +55,7 @@ namespace NPC_File_Browser
                     long totalSize = cDrive.TotalSize;
                     long usedSpace = totalSize - cDrive.TotalFreeSpace;
                     UpdateProgressBar((int)Math.Round((double)usedSpace / totalSize * 100));
-                    LabelSize.Text = $"{Helper.Helper.ConvertedSize(usedSpace)} / {Helper.Helper.ConvertedSize(totalSize)}";
+                    LabelSize.Text = $"{Helper.Helper.ConvertedSize(usedSpace, true)} / {Helper.Helper.ConvertedSize(totalSize, true)}";
                 }
             }
             catch { }

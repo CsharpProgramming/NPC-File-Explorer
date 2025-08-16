@@ -135,7 +135,7 @@ namespace NPC_File_Browser.Helper
             _sizeCache.Clear();
         }
 
-        public static string ConvertedSize(double bytes)
+        public static string ConvertedSize(double bytes, bool rounded)
         {
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
 
@@ -148,7 +148,15 @@ namespace NPC_File_Browser.Helper
                 len = len / 1024;
             }
 
-            return $"{len:0.##} {sizes[order]}";
+            if (rounded)
+            {
+                return $"{len:0} {sizes[order]}";
+            }
+
+            else
+            {
+                return $"{len:0.##} {sizes[order]}";
+            }
         }
 
         public static void CopyDirectory(string sourceDir, string destDir)

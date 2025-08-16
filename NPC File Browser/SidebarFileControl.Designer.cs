@@ -52,7 +52,7 @@
             this.Icon.IconColor = System.Drawing.Color.White;
             this.Icon.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.Icon.IconSize = 23;
-            this.Icon.Location = new System.Drawing.Point(0, 1);
+            this.Icon.Location = new System.Drawing.Point(0, 3);
             this.Icon.Name = "Icon";
             this.Icon.Size = new System.Drawing.Size(30, 23);
             this.Icon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
