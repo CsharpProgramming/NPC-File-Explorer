@@ -52,6 +52,7 @@
             this.ButtonBack = new FontAwesome.Sharp.IconPictureBox();
             this.ButtonReturn = new FontAwesome.Sharp.IconPictureBox();
             this.ContentPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.ItemCountLabel = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -76,6 +77,7 @@
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.panel1.Controls.Add(this.ItemCountLabel);
             this.panel1.Controls.Add(this.SidebarPanel);
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
@@ -86,7 +88,7 @@
             // 
             this.SidebarPanel.Location = new System.Drawing.Point(7, 12);
             this.SidebarPanel.Name = "SidebarPanel";
-            this.SidebarPanel.Size = new System.Drawing.Size(236, 628);
+            this.SidebarPanel.Size = new System.Drawing.Size(236, 610);
             this.SidebarPanel.TabIndex = 0;
             // 
             // panel2
@@ -380,6 +382,19 @@
             this.ContentPanel.TabIndex = 3;
             this.ContentPanel.WrapContents = false;
             // 
+            // ItemCountLabel
+            // 
+            this.ItemCountLabel.AutoSize = true;
+            this.ItemCountLabel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.ItemCountLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ItemCountLabel.ForeColor = System.Drawing.Color.White;
+            this.ItemCountLabel.Location = new System.Drawing.Point(0, 625);
+            this.ItemCountLabel.Name = "ItemCountLabel";
+            this.ItemCountLabel.Padding = new System.Windows.Forms.Padding(5);
+            this.ItemCountLabel.Size = new System.Drawing.Size(55, 27);
+            this.ItemCountLabel.TabIndex = 4;
+            this.ItemCountLabel.Text = "label1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -401,6 +416,7 @@
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.panel7.ResumeLayout(false);
@@ -446,6 +462,7 @@
         private FontAwesome.Sharp.IconPictureBox ButtonRefresh;
         private System.Windows.Forms.FlowLayoutPanel SidebarPanel;
         private NPC_File_Browser.Controls.ModernTextBox PathTextbox;
+        private System.Windows.Forms.Label ItemCountLabel;
     }
 }
 

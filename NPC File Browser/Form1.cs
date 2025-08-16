@@ -75,6 +75,7 @@ namespace NPC_File_Browser
             PathTextbox.TextBoxText = CurrentPath;
             ContentPanel.Controls.Clear();
             _fileControls.Clear();
+            int itemCount = 0;
 
             try
             {
@@ -96,8 +97,8 @@ namespace NPC_File_Browser
                         extension = "File";
                     }
 
-                    AddItem(true, info.Name, Helper.Helper.ConvertedSize(Convert.ToDouble(info.Length), false),
-                           extension, info.FullName);
+                    AddItem(true, info.Name, Helper.Helper.ConvertedSize(Convert.ToDouble(info.Length), false), extension, info.FullName);
+                    itemCount++;
                 }
 
                 foreach (var folder in folders)
@@ -108,6 +109,7 @@ namespace NPC_File_Browser
                     var fileControl = AddItem(false, info.Name, "Calculating...", "Folder", info.FullName);
 
                     Task.Run(async () => await CalculateFolderSizeAsync(info, fileControl, cancellationToken));
+                    itemCount++;
                 }
             }
             catch (UnauthorizedAccessException)
@@ -122,6 +124,8 @@ namespace NPC_File_Browser
             {
                 MessageBox.Show("Error loading directory: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            ItemCountLabel.Text = itemCount + " Items";
         }
 
         private async Task CalculateFolderSizeAsync(DirectoryInfo info, FileControl fileControl, CancellationToken cancellationToken)
