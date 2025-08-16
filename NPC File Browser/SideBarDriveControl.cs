@@ -73,8 +73,7 @@ namespace NPC_File_Browser
         }
         private void UpdateProgressBar(int percentage)
         {
-            if (bmp != null)
-                bmp.Dispose();
+            if (bmp != null) bmp.Dispose();
 
             bmp = new Bitmap(pbWIDTH, pbHEIGHT);
 

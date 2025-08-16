@@ -10,17 +10,12 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Shapes;
 
 namespace NPC_File_Browser
 {
     public partial class Form1 : Form
     {
-        enum DwmWindowAttribute : uint
-        {
-            DWMWA_USE_IMMERSIVE_DARK_MODE = 20,
-            DWMWA_MICA_EFFECT = 38,
-        }
+        enum DwmWindowAttribute : uint { DWMWA_USE_IMMERSIVE_DARK_MODE = 20, DWMWA_MICA_EFFECT = 38, }
 
         [DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
         static extern int SetWindowTheme(IntPtr hWnd, string pszSubAppName, string pszSubIdList);
@@ -109,18 +104,21 @@ namespace NPC_File_Browser
                     DirectoryInfo info = new DirectoryInfo(folder);
                     var fileControl = AddItem(false, info.Name, "Calculating...", "Folder", info.FullName);
 
-                    Task.Run(async () => await CalculateFolderSizeAsync(info, fileControl, cancellationToken));
+                    await Task.Run(async () => await CalculateFolderSizeAsync(info, fileControl, cancellationToken));
                     itemCount++;
                 }
             }
+
             catch (UnauthorizedAccessException)
             {
                 MessageBox.Show("Access denied to this directory.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+
             catch (DirectoryNotFoundException)
             {
                 MessageBox.Show("Directory not found.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+
             catch (Exception ex)
             {
                 MessageBox.Show("Error loading directory: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -147,6 +145,7 @@ namespace NPC_File_Browser
                     }
                 }
             }
+
             catch (Exception)
             {
                 if (!cancellationToken.IsCancellationRequested && !fileControl.IsDisposed)
@@ -193,6 +192,7 @@ namespace NPC_File_Browser
             {
                 ButtonStar.IconFont = FontAwesome.Sharp.IconFont.Solid;
             }
+
             else
             {
                 ButtonStar.IconFont = FontAwesome.Sharp.IconFont.Regular;
@@ -223,6 +223,7 @@ namespace NPC_File_Browser
             {
                 await LoadItemsAsync(Directory.GetParent(CurrentPath).FullName);
             }
+
             else
             {
                 System.Media.SystemSounds.Beep.Play();
@@ -253,6 +254,11 @@ namespace NPC_File_Browser
                 {
                     await LoadItemsAsync(PathTextbox.TextBoxText);
                 }
+
+                else
+                {
+                    PathTextbox.TextBoxText = CurrentPath;
+                }
             }
 
             if ((ModifierKeys & Keys.Control) == Keys.Control && e.KeyCode == Keys.A)
@@ -277,6 +283,7 @@ namespace NPC_File_Browser
                     }
                 }
 
+                EnableUI();
                 ItemCountLabel.Text = itemCount + " Items | " + PathsClicked.Count + " Selected";
             }
         }
@@ -312,11 +319,13 @@ namespace NPC_File_Browser
                         {
                             File.Copy(path, System.IO.Path.Combine(directory, System.IO.Path.GetFileName(path)), overwrite: true);
                         }
+
                         else if (Directory.Exists(path))
                         {
                             Helper.Helper.CopyDirectory(path, System.IO.Path.Combine(directory, System.IO.Path.GetFileName(path)));
                         }
                     }
+
                     catch (Exception ex)
                     {
                         MessageBox.Show("Error pasting: " + ex.Message);
@@ -333,6 +342,7 @@ namespace NPC_File_Browser
                 {
                     File.Delete(directory);
                 }
+                
                 else if (Directory.Exists(directory))
                 {
                     Directory.Delete(directory, true);
@@ -372,7 +382,7 @@ namespace NPC_File_Browser
 
         private void ButtonCut_Click(object sender, EventArgs e)
         {
-            //Nah I aint doing this rn. I tried.
+            //Coming in 1.3.0!
         }
 
         private void EnableUI()
@@ -404,7 +414,6 @@ namespace NPC_File_Browser
         {
             SidebarPanel.Controls.Clear();
 
-            //Add common folders
             AddSidebarFile("Desktop", Environment.GetFolderPath(Environment.SpecialFolder.Desktop), FontAwesome.Sharp.IconChar.Desktop);
             AddSidebarFile("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads", FontAwesome.Sharp.IconChar.Download);
             AddSidebarFile("Documents", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), FontAwesome.Sharp.IconChar.FilePdf);
@@ -412,7 +421,6 @@ namespace NPC_File_Browser
 
             AddSideBarSeperator();
 
-            //Add drives
             try
             {
                 foreach (DriveInfo drive in DriveInfo.GetDrives())
@@ -424,7 +432,6 @@ namespace NPC_File_Browser
 
             AddSideBarSeperator();
 
-            //Add pinned folders
             if (File.Exists(PinnedFilePath))
             {
                 foreach (string path in File.ReadAllLines(PinnedFilePath))
@@ -465,7 +472,7 @@ namespace NPC_File_Browser
             panel1.BackColor = Color.Transparent;
             Panel panel2 = new Panel();
             panel2.Size = new Size(236, 2);
-            panel2.BackColor = Color.White;
+            panel2.BackColor = Color.DimGray;
             Panel panel3 = new Panel();
             panel3.Size = new Size(236, 5);
             panel3.BackColor = Color.Transparent;
@@ -511,6 +518,7 @@ namespace NPC_File_Browser
             {
                 RemovePinnedFolder(LastPathClicked);
             }
+
             else
             {
                 AddPinnedFolder(LastPathClicked);
@@ -525,11 +533,6 @@ namespace NPC_File_Browser
             _loadCancellationTokenSource?.Cancel();
             _loadCancellationTokenSource?.Dispose();
             base.OnFormClosed(e);
-        }
-
-        private async void PathTextbox_KeyDown(object sender, KeyEventArgs e)
-        {
-
         }
     }
 }
