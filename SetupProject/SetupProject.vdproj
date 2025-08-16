@@ -80,6 +80,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -271,9 +279,9 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:SetupProject"
+        "ProductName" = "8:NPC File Explorer"
         "ProductCode" = "8:{76C960F8-7FE7-4ADC-9274-538D1C9E5F0D}"
-        "PackageCode" = "8:{849884E4-CE30-4743-93E6-50130D06EFEA}"
+        "PackageCode" = "8:{626D9994-C737-47F1-8C91-3A3B5692D402}"
         "UpgradeCode" = "8:{19351199-06B2-4282-B505-7B8835AF42A7}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -283,13 +291,13 @@
         "ProductVersion" = "8:1.2.0"
         "Manufacturer" = "8:@CsharpProgramming"
         "ARPHELPTELEPHONE" = "8:"
-        "ARPHELPLINK" = "8:"
-        "Title" = "8:SetupProject"
+        "ARPHELPLINK" = "8:github.com/CsharpProgramming/NPC-File-Explorer"
+        "Title" = "8:NPC File Explorer"
         "Subject" = "8:"
         "ARPCONTACT" = "8:@CsharpProgramming"
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
-        "ARPURLINFOABOUT" = "8:"
+        "ARPURLINFOABOUT" = "8:youtube.com/@CsharpProgramming"
         "ARPPRODUCTICON" = "8:"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
