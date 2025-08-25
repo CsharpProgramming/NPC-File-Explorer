@@ -33,6 +33,7 @@
             this.ItemCountLabel = new System.Windows.Forms.Label();
             this.SidebarPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.PathTextbox = new NPC_File_Browser.Controls.ModernTextBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel7 = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
@@ -52,7 +53,6 @@
             this.ButtonBack = new FontAwesome.Sharp.IconPictureBox();
             this.ButtonReturn = new FontAwesome.Sharp.IconPictureBox();
             this.ContentPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.PathTextbox = new NPC_File_Browser.Controls.ModernTextBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -113,6 +113,23 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(1234, 54);
             this.panel2.TabIndex = 1;
+            // 
+            // PathTextbox
+            // 
+            this.PathTextbox.BackColor = System.Drawing.Color.Transparent;
+            this.PathTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.PathTextbox.BorderColor = System.Drawing.Color.Transparent;
+            this.PathTextbox.BorderRadius = 10;
+            this.PathTextbox.Location = new System.Drawing.Point(260, 9);
+            this.PathTextbox.Multiline = false;
+            this.PathTextbox.Name = "PathTextbox";
+            this.PathTextbox.Padding = new System.Windows.Forms.Padding(10);
+            this.PathTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
+            this.PathTextbox.PlaceholderText = "Path";
+            this.PathTextbox.Size = new System.Drawing.Size(729, 36);
+            this.PathTextbox.TabIndex = 100;
+            this.PathTextbox.TextBoxText = "";
+            this.PathTextbox.TextColor = System.Drawing.Color.White;
             // 
             // panel3
             // 
@@ -224,7 +241,7 @@
             // 
             this.ButtonRename.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.ButtonRename.ForeColor = System.Drawing.Color.Gray;
-            this.ButtonRename.IconChar = FontAwesome.Sharp.IconChar.Keyboard;
+            this.ButtonRename.IconChar = FontAwesome.Sharp.IconChar.Pen;
             this.ButtonRename.IconColor = System.Drawing.Color.Gray;
             this.ButtonRename.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonRename.IconSize = 23;
@@ -327,8 +344,9 @@
             // ButtonForward
             // 
             this.ButtonForward.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.ButtonForward.ForeColor = System.Drawing.Color.Gray;
             this.ButtonForward.IconChar = FontAwesome.Sharp.IconChar.ArrowRight;
-            this.ButtonForward.IconColor = System.Drawing.Color.White;
+            this.ButtonForward.IconColor = System.Drawing.Color.Gray;
             this.ButtonForward.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonForward.IconSize = 23;
             this.ButtonForward.Location = new System.Drawing.Point(56, 6);
@@ -341,8 +359,9 @@
             // ButtonBack
             // 
             this.ButtonBack.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.ButtonBack.ForeColor = System.Drawing.Color.Gray;
             this.ButtonBack.IconChar = FontAwesome.Sharp.IconChar.ArrowLeft;
-            this.ButtonBack.IconColor = System.Drawing.Color.White;
+            this.ButtonBack.IconColor = System.Drawing.Color.Gray;
             this.ButtonBack.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonBack.IconSize = 23;
             this.ButtonBack.Location = new System.Drawing.Point(33, 6);
@@ -355,7 +374,7 @@
             // ButtonReturn
             // 
             this.ButtonReturn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.ButtonReturn.IconChar = FontAwesome.Sharp.IconChar.BackwardStep;
+            this.ButtonReturn.IconChar = FontAwesome.Sharp.IconChar.ArrowUp;
             this.ButtonReturn.IconColor = System.Drawing.Color.White;
             this.ButtonReturn.IconFont = FontAwesome.Sharp.IconFont.Solid;
             this.ButtonReturn.IconSize = 23;
@@ -378,23 +397,6 @@
             this.ContentPanel.Size = new System.Drawing.Size(983, 555);
             this.ContentPanel.TabIndex = 3;
             this.ContentPanel.WrapContents = false;
-            // 
-            // PathTextbox
-            // 
-            this.PathTextbox.BackColor = System.Drawing.Color.Transparent;
-            this.PathTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.PathTextbox.BorderColor = System.Drawing.Color.Transparent;
-            this.PathTextbox.BorderRadius = 10;
-            this.PathTextbox.Location = new System.Drawing.Point(260, 9);
-            this.PathTextbox.Multiline = false;
-            this.PathTextbox.Name = "PathTextbox";
-            this.PathTextbox.Padding = new System.Windows.Forms.Padding(10);
-            this.PathTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
-            this.PathTextbox.PlaceholderText = "Path";
-            this.PathTextbox.Size = new System.Drawing.Size(729, 36);
-            this.PathTextbox.TabIndex = 100;
-            this.PathTextbox.TextBoxText = "";
-            this.PathTextbox.TextColor = System.Drawing.Color.White;
             // 
             // Form1
             // 

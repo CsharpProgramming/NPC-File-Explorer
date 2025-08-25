@@ -12,7 +12,7 @@ namespace NPC_File_Browser
         public SidebarFileControl(string fileName, FontAwesome.Sharp.IconChar icon)
         {
             InitializeComponent();
-            FileNameLabel.Text = fileName;
+            FileNameLabel.Text = Helper.Helper.TruncateFilename(fileName);
             this.DoubleClick += SidebarFileControl_DoubleClick;
             Icon.IconChar = icon;
         }

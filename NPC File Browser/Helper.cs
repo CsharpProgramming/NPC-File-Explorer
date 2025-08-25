@@ -175,5 +175,17 @@ namespace NPC_File_Browser.Helper
                 CopyDirectory(subDir, destSubDir);
             }
         }
+
+        public static string TruncateFilename(string name)
+        {
+            int max = 60;
+
+            if (name.Length <= max)
+            {
+                return name;
+            }
+
+            return name.Substring(0, max - 3) + "...";
+        }
     }
 }

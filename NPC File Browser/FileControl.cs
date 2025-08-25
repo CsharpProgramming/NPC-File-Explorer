@@ -25,7 +25,7 @@ namespace NPC_File_Browser
             else
                 Icon.IconChar = FontAwesome.Sharp.IconChar.Folder;
 
-            FileNameLabel.Text = fileName;
+            FileNameLabel.Text = Helper.Helper.TruncateFilename(fileName);
             FileExtensionLabel.Text = fileExtension;
             FileSizeLabel.Text = fileSize;
             this.Click += FileControl_Click;

@@ -204,6 +204,8 @@ namespace NPC_File_Browser
             if (Directory.Exists(directory))
             {
                 await LoadItemsAsync(directory);
+                DisableUI();
+                PathsClicked.Clear();
             }
 
             else if (File.Exists(directory)) 
