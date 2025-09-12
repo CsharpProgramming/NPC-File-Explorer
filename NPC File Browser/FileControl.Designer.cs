@@ -59,9 +59,9 @@ namespace NPC_File_Browser
             this.FileNameLabel.ForeColor = System.Drawing.Color.White;
             this.FileNameLabel.Location = new System.Drawing.Point(35, 4);
             this.FileNameLabel.Name = "FileNameLabel";
-            this.FileNameLabel.Size = new System.Drawing.Size(45, 17);
+            this.FileNameLabel.Size = new System.Drawing.Size(44, 17);
             this.FileNameLabel.TabIndex = 1;
-            this.FileNameLabel.Text = "label1";
+            this.FileNameLabel.Text = "Name";
             // 
             // FileExtensionLabel
             // 
@@ -70,9 +70,9 @@ namespace NPC_File_Browser
             this.FileExtensionLabel.ForeColor = System.Drawing.Color.White;
             this.FileExtensionLabel.Location = new System.Drawing.Point(433, 4);
             this.FileExtensionLabel.Name = "FileExtensionLabel";
-            this.FileExtensionLabel.Size = new System.Drawing.Size(45, 17);
+            this.FileExtensionLabel.Size = new System.Drawing.Size(68, 17);
             this.FileExtensionLabel.TabIndex = 2;
-            this.FileExtensionLabel.Text = "label1";
+            this.FileExtensionLabel.Text = "Extension";
             // 
             // FileSizeLabel
             // 
@@ -81,9 +81,9 @@ namespace NPC_File_Browser
             this.FileSizeLabel.ForeColor = System.Drawing.Color.White;
             this.FileSizeLabel.Location = new System.Drawing.Point(530, 4);
             this.FileSizeLabel.Name = "FileSizeLabel";
-            this.FileSizeLabel.Size = new System.Drawing.Size(45, 17);
+            this.FileSizeLabel.Size = new System.Drawing.Size(32, 17);
             this.FileSizeLabel.TabIndex = 3;
-            this.FileSizeLabel.Text = "label1";
+            this.FileSizeLabel.Text = "Size";
             // 
             // FileControl
             // 

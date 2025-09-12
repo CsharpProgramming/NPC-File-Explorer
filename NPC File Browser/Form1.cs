@@ -1,4 +1,5 @@
 ﻿using NPC_File_Browser;
+using NPC_File_Browser.Properties;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -35,6 +36,12 @@ namespace NPC_File_Browser
         public Form1()
         {
             InitializeComponent();
+
+            if (Settings.Default.FormWidth != 0 && Settings.Default.FormHeight != 0)
+            {
+                this.Size = new Size(Settings.Default.FormWidth, Settings.Default.FormHeight);
+            }
+            this.Location = new Point(Settings.Default.FormX, Settings.Default.FormY);
         }
 
         private void EnableControlDarkMode(Control control)
@@ -99,7 +106,7 @@ namespace NPC_File_Browser
 
                 foreach (var folder in folders)
                 {
-                    if (cancellationToken.IsCancellationRequested) return;
+                     if (cancellationToken.IsCancellationRequested) return;
 
                     DirectoryInfo info = new DirectoryInfo(folder);
                     var fileControl = AddItem(false, info.Name, "Calculating...", "Folder", info.FullName);
@@ -185,7 +192,7 @@ namespace NPC_File_Browser
                 EnableUI();
             }
         }
-
+        
         private void UpdateStarButton()
         {
             if (IsPathPinned(LastPathClicked))
@@ -535,6 +542,15 @@ namespace NPC_File_Browser
             _loadCancellationTokenSource?.Cancel();
             _loadCancellationTokenSource?.Dispose();
             base.OnFormClosed(e);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Settings.Default.FormWidth = this.Width;
+            Settings.Default.FormHeight = this.Height;
+            Settings.Default.FormX = Location.X;
+            Settings.Default.FormY = Location.Y;
+            Settings.Default.Save();
         }
     }
 }

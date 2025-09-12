@@ -33,7 +33,6 @@
             this.ItemCountLabel = new System.Windows.Forms.Label();
             this.SidebarPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.PathTextbox = new NPC_File_Browser.Controls.ModernTextBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel7 = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
@@ -53,6 +52,7 @@
             this.ButtonBack = new FontAwesome.Sharp.IconPictureBox();
             this.ButtonReturn = new FontAwesome.Sharp.IconPictureBox();
             this.ContentPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.PathTextbox = new NPC_File_Browser.Controls.ModernTextBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -113,23 +113,6 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(1234, 54);
             this.panel2.TabIndex = 1;
-            // 
-            // PathTextbox
-            // 
-            this.PathTextbox.BackColor = System.Drawing.Color.Transparent;
-            this.PathTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.PathTextbox.BorderColor = System.Drawing.Color.Transparent;
-            this.PathTextbox.BorderRadius = 10;
-            this.PathTextbox.Location = new System.Drawing.Point(260, 9);
-            this.PathTextbox.Multiline = false;
-            this.PathTextbox.Name = "PathTextbox";
-            this.PathTextbox.Padding = new System.Windows.Forms.Padding(10);
-            this.PathTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
-            this.PathTextbox.PlaceholderText = "Path";
-            this.PathTextbox.Size = new System.Drawing.Size(729, 36);
-            this.PathTextbox.TabIndex = 100;
-            this.PathTextbox.TextBoxText = "";
-            this.PathTextbox.TextColor = System.Drawing.Color.White;
             // 
             // panel3
             // 
@@ -398,6 +381,23 @@
             this.ContentPanel.TabIndex = 3;
             this.ContentPanel.WrapContents = false;
             // 
+            // PathTextbox
+            // 
+            this.PathTextbox.BackColor = System.Drawing.Color.Transparent;
+            this.PathTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.PathTextbox.BorderColor = System.Drawing.Color.Transparent;
+            this.PathTextbox.BorderRadius = 10;
+            this.PathTextbox.Location = new System.Drawing.Point(260, 9);
+            this.PathTextbox.Multiline = false;
+            this.PathTextbox.Name = "PathTextbox";
+            this.PathTextbox.Padding = new System.Windows.Forms.Padding(10);
+            this.PathTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
+            this.PathTextbox.PlaceholderText = "Path";
+            this.PathTextbox.Size = new System.Drawing.Size(729, 36);
+            this.PathTextbox.TabIndex = 100;
+            this.PathTextbox.TextBoxText = "";
+            this.PathTextbox.TextColor = System.Drawing.Color.White;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -415,6 +415,7 @@
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "NPC File Explorer | v.1.2.0";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.Resize += new System.EventHandler(this.Form1_Resize);

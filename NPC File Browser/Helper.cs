@@ -11,8 +11,6 @@ namespace NPC_File_Browser.Helper
     {
         private static readonly ConcurrentDictionary<string, (long size, DateTime lastModified)> _sizeCache = new ConcurrentDictionary<string, (long, DateTime)>();
 
-        private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(5);
-
         public static async Task<long> GetFolderSizeAsync(DirectoryInfo info, CancellationToken cancellationToken = default(CancellationToken))
         {
             try
@@ -22,8 +20,7 @@ namespace NPC_File_Browser.Helper
 
                 if (_sizeCache.TryGetValue(path, out var cached))
                 {
-                    if (DateTime.Now - cached.lastModified < CacheExpiry &&
-                        Math.Abs((lastWrite - cached.lastModified).TotalSeconds) < 1)
+                    if (DateTime.Now - cached.lastModified < TimeSpan.FromMinutes(5) && Math.Abs((lastWrite - cached.lastModified).TotalSeconds) < 1)
                     {
                         return cached.size;
                     }

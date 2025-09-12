@@ -21,9 +21,14 @@ namespace NPC_File_Browser
         {
             InitializeComponent();
             if (isFile)
+            {
                 Icon.IconChar = FontAwesome.Sharp.IconChar.File;
+            }
+
             else
+            {
                 Icon.IconChar = FontAwesome.Sharp.IconChar.Folder;
+            }
 
             FileNameLabel.Text = Helper.Helper.TruncateFilename(fileName);
             FileExtensionLabel.Text = fileExtension;
@@ -31,7 +36,6 @@ namespace NPC_File_Browser
             this.Click += FileControl_Click;
         }
 
-        // Add this method to update the size dynamically
         public void UpdateSize(string newSize)
         {
             if (InvokeRequired)
