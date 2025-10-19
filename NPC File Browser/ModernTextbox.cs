@@ -16,8 +16,7 @@ namespace NPC_File_Browser.Controls
     {
         private TextBox textBox;
         private bool isPlaceholderActive = true;
-
-        public string PlaceholderText { get; set; } = "Enter text...";
+        public string PlaceholderText { get; set; } = "";
         public Color BorderColor { get; set; } = Color.Gray;
         public int BorderRadius { get; set; } = 10;
         public Color BackgroundColor { get; set; } = Color.FromArgb(35, 35, 35);

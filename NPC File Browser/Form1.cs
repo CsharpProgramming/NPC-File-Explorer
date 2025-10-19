@@ -23,7 +23,7 @@ namespace NPC_File_Browser
 
         [DllImport("dwmapi.dll")]
         static extern int DwmSetWindowAttribute(IntPtr hwnd, DwmWindowAttribute attr, ref int attrValue, int attrSize);
-
+        
         List<string> PathsClicked = new List<string>();
         string CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads";
         string LastPathClicked;

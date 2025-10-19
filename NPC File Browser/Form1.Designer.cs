@@ -52,6 +52,7 @@
             this.ButtonBack = new FontAwesome.Sharp.IconPictureBox();
             this.ButtonReturn = new FontAwesome.Sharp.IconPictureBox();
             this.ContentPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.SearchTextbox = new NPC_File_Browser.Controls.ModernTextBox();
             this.PathTextbox = new NPC_File_Browser.Controls.ModernTextBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -107,6 +108,7 @@
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(35)))), ((int)(((byte)(35)))));
+            this.panel2.Controls.Add(this.SearchTextbox);
             this.panel2.Controls.Add(this.PathTextbox);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 0);
@@ -381,6 +383,23 @@
             this.ContentPanel.TabIndex = 3;
             this.ContentPanel.WrapContents = false;
             // 
+            // SearchTextbox
+            // 
+            this.SearchTextbox.BackColor = System.Drawing.Color.Transparent;
+            this.SearchTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.SearchTextbox.BorderColor = System.Drawing.Color.Transparent;
+            this.SearchTextbox.BorderRadius = 10;
+            this.SearchTextbox.Location = new System.Drawing.Point(997, 9);
+            this.SearchTextbox.Multiline = false;
+            this.SearchTextbox.Name = "SearchTextbox";
+            this.SearchTextbox.Padding = new System.Windows.Forms.Padding(10);
+            this.SearchTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
+            this.SearchTextbox.PlaceholderText = "Search...";
+            this.SearchTextbox.Size = new System.Drawing.Size(227, 36);
+            this.SearchTextbox.TabIndex = 101;
+            this.SearchTextbox.TextBoxText = "";
+            this.SearchTextbox.TextColor = System.Drawing.Color.White;
+            // 
             // PathTextbox
             // 
             this.PathTextbox.BackColor = System.Drawing.Color.Transparent;
@@ -467,6 +486,7 @@
         private System.Windows.Forms.FlowLayoutPanel SidebarPanel;
         private NPC_File_Browser.Controls.ModernTextBox PathTextbox;
         private System.Windows.Forms.Label ItemCountLabel;
+        private Controls.ModernTextBox SearchTextbox;
     }
 }
 
