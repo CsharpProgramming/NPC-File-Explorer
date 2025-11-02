@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing.Drawing2D;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.ComponentModel;
 
@@ -75,7 +71,7 @@ namespace NPC_File_Browser.Controls
             }
         }
 
-        private void RemovePlaceholder(object sender, EventArgs e)
+        public void RemovePlaceholder(object sender, EventArgs e)
         {
             if (isPlaceholderActive)
             {
@@ -85,7 +81,7 @@ namespace NPC_File_Browser.Controls
             }
         }
 
-        private void SetPlaceholder(object sender, EventArgs e)
+        public void SetPlaceholder(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(textBox.Text))
             {
@@ -138,5 +134,11 @@ namespace NPC_File_Browser.Controls
                 }
             }
         }
+
+        public void SetPlaceholderText(string placeholder)
+        {
+            PlaceholderText = placeholder;
+            SetPlaceholder(this, EventArgs.Empty);
+        }   
     }
 }

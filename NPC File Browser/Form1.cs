@@ -69,55 +69,25 @@ namespace NPC_File_Browser
             LoadSidebar();
             EnableControlDarkMode(ContentPanel);
             EnableControlDarkMode(this);
-
-            // Load existing index
-            _fileSearch.LoadIndex();
+            await _fileSearch.LoadIndex();
 
             if (!_fileSearch.HasIndex())
             {
-                var result = MessageBox.Show(
-                    "No search index found. Would you like to build one now?\n\n" +
-                    "This will scan your user profile folder and may take a few minutes.\n" +
-                    "You can continue using the file explorer while indexing runs in the background.",
-                    "Build Search Index",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
-                {
-                    await BuildIndexWithProgress();
-                }
+                ItemCountLabel.Text = ItemCountLabel.Text + " | Building Search Index";
+                string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                await _fileSearch.BuildIndexAsync(rootPath);
+                ItemCountLabel.Text = ItemCountLabel.Text.Replace(" | Building Search Index", " | Index built");
             }
-            else
+            
+            else //Start file watcher for updating the index
             {
-                var metadata = _fileSearch.GetMetadata();
-                var daysSinceUpdate = (DateTime.Now - metadata.LastFullIndex).TotalDays;
-
-                Debug.WriteLine($"Index loaded: {metadata.FileCount:N0} files, last updated {daysSinceUpdate:F1} days ago");
-
-                // Prompt for update if index is old
-                if (daysSinceUpdate > 7)
-                {
-                    var result = MessageBox.Show(
-                        $"Your search index was last updated {daysSinceUpdate:F0} days ago.\n\n" +
-                        "Would you like to update it now to ensure accurate search results?",
-                        "Update Search Index",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question);
-
-                    if (result == DialogResult.Yes)
-                    {
-                        await UpdateIndexWithProgress();
-                    }
-                }
-
-                // Start file watcher for real-time updates
+                SearchTextbox.RemovePlaceholder(sender, e);
+                SearchTextbox.SetPlaceholderText("Search...");
                 string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                 _fileSearch.SetupFileWatcher(rootPath);
             }
 
             _indexLoaded = true;
-            Debug.WriteLine("File search system ready!");
         }
 
         private void DisplaySearchResults(List<FileSearch.FileEntry> results)
@@ -128,162 +98,19 @@ namespace NPC_File_Browser
 
             foreach (var result in results)
             {
-                AddItem(true, result.Name, Helper.Helper.ConvertedSize(result.Size, false), "File", result.FullPath);
+                FileInfo info = new FileInfo(result.Name);
+                string extension = string.IsNullOrEmpty(info.Extension) ? "File" : info.Extension.Substring(1).ToUpper() + " File";
+                AddItem(true, result.Name, Helper.Helper.ConvertedSize(result.Size, false), extension, result.FullPath);
                 itemCount++;
             }
 
-            ItemCountLabel.Text = results.Count + " Results Found";
+            ItemCountLabel.Text = results.Count + " Results Found"; 
         }
 
-        private async Task BuildIndexWithProgress()
-        {
-            var progressForm = new Form
-            {
-                Text = "Building Search Index",
-                Size = new Size(400, 150),
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                StartPosition = FormStartPosition.CenterParent,
-                MaximizeBox = false,
-                MinimizeBox = false
-            };
-
-            var label = new Label
-            {
-                Text = "Scanning files...",
-                Location = new Point(20, 20),
-                Size = new Size(360, 20)
-            };
-
-            var progressBar = new ProgressBar
-            {
-                Location = new Point(20, 50),
-                Size = new Size(340, 23),
-                Style = ProgressBarStyle.Marquee
-            };
-
-            var cancelButton = new Button
-            {
-                Text = "Run in Background",
-                Location = new Point(140, 85),
-                Size = new Size(120, 30)
-            };
-
-            bool cancelled = false;
-            cancelButton.Click += (s, e) =>
-            {
-                cancelled = true;
-                progressForm.Close();
-            };
-
-            progressForm.Controls.Add(label);
-            progressForm.Controls.Add(progressBar);
-            progressForm.Controls.Add(cancelButton);
-
-            var progress = new Progress<int>(count =>
-            {
-                if (!progressForm.IsDisposed)
-                {
-                    label.Text = $"Indexed {count:N0} files...";
-                }
-            });
-
-            progressForm.Show();
-
-            string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            await _fileSearch.BuildIndexAsync(rootPath, progress);
-
-            if (!cancelled && !progressForm.IsDisposed)
-            {
-                var metadata = _fileSearch.GetMetadata();
-                MessageBox.Show(
-                    $"Search index built successfully!\n\n" +
-                    $"Files indexed: {metadata.FileCount:N0}\n" +
-                    $"Total size: {Helper.Helper.ConvertedSize(metadata.TotalSize, false)}\n\n" +
-                    "Real-time updates are now enabled.",
-                    "Index Ready",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
-                progressForm.Close();
-            }
-        }
-
-        // Add this new method for updating index with progress
-        private async Task UpdateIndexWithProgress()
-        {
-            var progressForm = new Form
-            {
-                Text = "Updating Search Index",
-                Size = new Size(400, 150),
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                StartPosition = FormStartPosition.CenterParent,
-                MaximizeBox = false,
-                MinimizeBox = false
-            };
-
-            var label = new Label
-            {
-                Text = "Checking for changes...",
-                Location = new Point(20, 20),
-                Size = new Size(360, 20)
-            };
-
-            var progressBar = new ProgressBar
-            {
-                Location = new Point(20, 50),
-                Size = new Size(340, 23),
-                Style = ProgressBarStyle.Marquee
-            };
-
-            var cancelButton = new Button
-            {
-                Text = "Run in Background",
-                Location = new Point(140, 85),
-                Size = new Size(120, 30)
-            };
-
-            bool cancelled = false;
-            cancelButton.Click += (s, e) =>
-            {
-                cancelled = true;
-                progressForm.Close();
-            };
-
-            progressForm.Controls.Add(label);
-            progressForm.Controls.Add(progressBar);
-            progressForm.Controls.Add(cancelButton);
-
-            var progress = new Progress<int>(count =>
-            {
-                if (!progressForm.IsDisposed)
-                {
-                    label.Text = $"Processed {count:N0} files...";
-                }
-            });
-
-            progressForm.Show();
-
-            string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            await _fileSearch.UpdateIndexAsync(rootPath, progress);
-
-            if (!cancelled && !progressForm.IsDisposed)
-            {
-                MessageBox.Show(
-                    "Search index updated successfully!",
-                    "Update Complete",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-
-                progressForm.Close();
-            }
-        }
-
-        // Update the RunSearchAsync method for better search experience:
         private async Task RunSearchAsync(string query)
         {
             if (!_indexLoaded || string.IsNullOrWhiteSpace(query))
             {
-                // If empty query, reload current directory
                 if (_indexLoaded && string.IsNullOrWhiteSpace(query))
                 {
                     await LoadItemsAsync(CurrentPath);
@@ -291,7 +118,6 @@ namespace NPC_File_Browser
                 return;
             }
 
-            // Show searching indicator
             ItemCountLabel.Text = "Searching...";
 
             var results = await Task.Run(() => _fileSearch.Search(query, 500));
@@ -304,14 +130,15 @@ namespace NPC_File_Browser
                 var noResults = new Label
                 {
                     Text = $"No results found for \"{query}\"",
-                    ForeColor = Color.Gray,
-                    Font = new Font("Segoe UI", 12),
+                    ForeColor = Color.White,
+                    Font = new Font("Segoe UI", 10, FontStyle.Bold),
                     AutoSize = true,
-                    Location = new Point(20, 20)
+                    Anchor = AnchorStyles.Top | AnchorStyles.Left
                 };
                 ContentPanel.Controls.Add(noResults);
                 ItemCountLabel.Text = "0 Results";
             }
+
             else
             {
                 DisplaySearchResults(results);
@@ -508,32 +335,20 @@ namespace NPC_File_Browser
                 MessageBox.Show("Search index not loaded yet! Please build or load it first.", "Index Missing", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
-            if ((ModifierKeys & Keys.Control) == Keys.Control &&
-            (ModifierKeys & Keys.Shift) == Keys.Shift &&
-            e.KeyCode == Keys.R)
+            if ((ModifierKeys & Keys.Control) == Keys.Control && (ModifierKeys & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.R) //Rebuild index: ctrl+shift+r
             {
                 e.SuppressKeyPress = true;
 
-                var result = MessageBox.Show(
-                    "Rebuild the entire search index?\n\n" +
-                    "This will rescan all files and may take several minutes.",
-                    "Rebuild Index",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (result == DialogResult.Yes)
-                {
-                    await BuildIndexWithProgress();
-                }
+                ItemCountLabel.Text = itemCount + " Items" + " | Rebuilding Search Index";
+                string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                await _fileSearch.BuildIndexAsync(rootPath);
             }
 
-            // Add keyboard shortcut for updating index (Ctrl+R)
-            if ((ModifierKeys & Keys.Control) == Keys.Control &&
-                e.KeyCode == Keys.R &&
-                (ModifierKeys & Keys.Shift) != Keys.Shift)
+            if ((ModifierKeys & Keys.Control) == Keys.Control && e.KeyCode == Keys.R && (ModifierKeys & Keys.Shift) != Keys.Shift) //Update index: ctr+r
             {
                 e.SuppressKeyPress = true;
-                await UpdateIndexWithProgress();
+                string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                await _fileSearch.UpdateIndexAsync(rootPath);
             }
 
             if ((ModifierKeys & Keys.Control) == Keys.Control && e.KeyCode == Keys.A)

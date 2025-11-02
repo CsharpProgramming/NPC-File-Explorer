@@ -341,23 +341,26 @@ namespace NPC_File_Explorer
             }
         }
 
-        public void LoadIndex()
+        public async Task LoadIndex()
         {
             try
             {
-                if (!File.Exists(_indexPath))
-                    return;
-
-                var json = File.ReadAllText(_indexPath);
-                _files = JsonConvert.DeserializeObject<List<FileEntry>>(json) ?? new List<FileEntry>();
-
-                RebuildInternalStructures();
-
-                if (File.Exists(_metadataPath))
+                await Task.Run(() =>
                 {
-                    var metaJson = File.ReadAllText(_metadataPath);
-                    _metadata = JsonConvert.DeserializeObject<IndexMetadata>(metaJson) ?? new IndexMetadata();
-                }
+                    if (!File.Exists(_indexPath))
+                        return;
+
+                    var json = File.ReadAllText(_indexPath);
+                    _files = JsonConvert.DeserializeObject<List<FileEntry>>(json) ?? new List<FileEntry>();
+
+                    RebuildInternalStructures();
+
+                    if (File.Exists(_metadataPath))
+                    {
+                        var metaJson = File.ReadAllText(_metadataPath);
+                        _metadata = JsonConvert.DeserializeObject<IndexMetadata>(metaJson) ?? new IndexMetadata();
+                    }
+                });
 
                 Debug.WriteLine($"Loaded {_files.Count} files from index (last indexed: {_metadata.LastFullIndex})");
             }
@@ -548,6 +551,7 @@ namespace NPC_File_Explorer
                                         Modified = info.LastWriteTime,
                                         Extension = info.Extension.ToLowerInvariant()
                                     };
+
 
                                     if (_filesByPath.TryGetValue(op.Path, out var existing))
                                     {
