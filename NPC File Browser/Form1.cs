@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Media.Animation;
 
 namespace NPC_File_Browser
 {
@@ -562,6 +563,8 @@ namespace NPC_File_Browser
             ButtonCopy.IconColor = Color.White;
             ButtonCut.Enabled = true;
             ButtonCut.IconColor = Color.White;
+            ButtonRename.Enabled = true;
+            ButtonRename.IconColor = Color.White;
             ButtonDelete.Enabled = true;
             ButtonDelete.IconColor = Color.White;
         }
@@ -572,6 +575,8 @@ namespace NPC_File_Browser
             ButtonCopy.IconColor = Color.Gray;
             ButtonCut.Enabled = false;
             ButtonCut.IconColor = Color.Gray;
+            ButtonRename.Enabled = false;
+            ButtonRename.IconColor = Color.Gray;
             ButtonDelete.Enabled = false;
             ButtonDelete.IconColor = Color.Gray;
         }
@@ -718,6 +723,35 @@ namespace NPC_File_Browser
             Settings.Default.FormX = Location.X;
             Settings.Default.FormY = Location.Y;
             Settings.Default.Save();
+        }
+
+        private async void ButtonRename_Click(object sender, EventArgs e)
+        {
+            string NewName = Microsoft.VisualBasic.Interaction.InputBox("Enter new file name", "Enter new name", Path.GetFileName(LastPathClicked), 0, 0);
+            string NewPath = Path.Combine(Path.GetDirectoryName(LastPathClicked), NewName);
+
+            if (NewName == null)
+            {
+                return;
+            }
+
+            if (Directory.Exists(LastPathClicked))
+            {
+                Directory.Move(LastPathClicked, NewPath);
+            }
+
+            else if (File.Exists(LastPathClicked))
+            {
+                File.Move(LastPathClicked, NewPath);
+            }
+
+            else
+            {
+                MessageBox.Show("File or folder does not exist.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            DisableUI();
+            await LoadItemsAsync(CurrentPath);
         }
     }
 }

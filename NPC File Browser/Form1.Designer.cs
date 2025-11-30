@@ -236,6 +236,7 @@
             this.ButtonRename.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.ButtonRename.TabIndex = 9;
             this.ButtonRename.TabStop = false;
+            this.ButtonRename.Click += new System.EventHandler(this.ButtonRename_Click);
             // 
             // ButtonStar
             // 
