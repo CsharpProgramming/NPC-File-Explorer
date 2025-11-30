@@ -404,6 +404,11 @@ namespace NPC_File_Browser
                 await LoadItemsAsync(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
             }
 
+            if (e.KeyCode == Keys.F2 && LastPathClicked != "")
+            {
+                RenameItem();
+            }
+
             if (e.KeyCode == Keys.Enter)
             {
                 e.SuppressKeyPress = true;
@@ -747,6 +752,11 @@ namespace NPC_File_Browser
         }
 
         private async void ButtonRename_Click(object sender, EventArgs e)
+        {
+            RenameItem();
+        }
+
+        private async void RenameItem()
         {
             string NewName = Microsoft.VisualBasic.Interaction.InputBox("Enter new file name", "Enter new name", Path.GetFileName(LastPathClicked), 0, 0);
             string NewPath = Path.Combine(Path.GetDirectoryName(LastPathClicked), NewName);
