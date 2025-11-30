@@ -36,6 +36,9 @@ namespace NPC_File_Browser
         private FileSearch _fileSearch = new FileSearch();
         private bool _indexLoaded = false;
 
+        private List<FileSearch.FileEntry> _pendingResults = new List<FileSearch.FileEntry>();
+        private bool _isLoadingBatch = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -90,21 +93,91 @@ namespace NPC_File_Browser
             _indexLoaded = true;
         }
 
-        private void DisplaySearchResults(List<FileSearch.FileEntry> results)
+        private async void DisplaySearchResults(List<FileSearch.FileEntry> results)
         {
+            ContentPanel.SuspendLayout();
             ContentPanel.Controls.Clear();
             _fileControls.Clear();
             itemCount = 0;
+            ContentPanel.ResumeLayout();
 
-            foreach (var result in results)
+            _pendingResults = results;
+
+            // Load first 100 instantly
+            await LoadBatch(0, Math.Min(100, results.Count));
+
+            // Load rest in background
+            if (results.Count > 100)
             {
-                FileInfo info = new FileInfo(result.Name);
-                string extension = string.IsNullOrEmpty(info.Extension) ? "File" : info.Extension.Substring(1).ToUpper() + " File";
-                AddItem(true, result.Name, Helper.Helper.ConvertedSize(result.Size, false), extension, result.FullPath);
-                itemCount++;
+                _ = LoadRemainingBatches(100);
+            }
+        }
+
+        private async Task LoadBatch(int start, int end)
+        {
+            var controls = new Control[end - start];
+
+            for (int i = start; i < end; i++)
+            {
+                var result = _pendingResults[i];
+                string extension = string.IsNullOrEmpty(result.Extension)
+                    ? "File"
+                    : result.Extension.Substring(1).ToUpper() + " File";
+
+                FileControl FC = new FileControl(true, result.Name,
+                    Helper.Helper.ConvertedSize(result.Size, false),
+                    extension);
+                FC.FolderPath = result.FullPath;
+                FC.FileClicked += UpdateItems_FileClicked;
+                FC.FileDoubleClicked += UpdateItems_FileDoubleClicked;
+
+                controls[i - start] = FC;
+                _fileControls[result.FullPath] = FC;
             }
 
-            ItemCountLabel.Text = results.Count + " Results Found"; 
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    ContentPanel.SuspendLayout();
+                    ContentPanel.Controls.AddRange(controls);
+                    ContentPanel.ResumeLayout();
+
+                    itemCount = ContentPanel.Controls.Count;
+                    ItemCountLabel.Text = itemCount < _pendingResults.Count
+                        ? $"Loaded {itemCount} of {_pendingResults.Count} Results..."
+                        : $"{_pendingResults.Count} Results Found";
+                }));
+            }
+            else
+            {
+                ContentPanel.SuspendLayout();
+                ContentPanel.Controls.AddRange(controls);
+                ContentPanel.ResumeLayout();
+
+                itemCount = ContentPanel.Controls.Count;
+                ItemCountLabel.Text = itemCount < _pendingResults.Count
+                    ? $"Loaded {itemCount} of {_pendingResults.Count} Results..."
+                    : $"{_pendingResults.Count} Results Found";
+            }
+        }
+
+        private async Task LoadRemainingBatches(int startIndex)
+        {
+            if (_isLoadingBatch) return;
+            _isLoadingBatch = true;
+
+            await Task.Run(async () =>
+            {
+                for (int i = startIndex; i < _pendingResults.Count; i += 100)
+                {
+                    int batchEnd = Math.Min(i + 100, _pendingResults.Count);
+                    await LoadBatch(i, batchEnd);
+                    await Task.Delay(50);
+                }
+            });
+
+            _isLoadingBatch = false;
         }
 
         private async Task RunSearchAsync(string query)
@@ -258,7 +331,7 @@ namespace NPC_File_Browser
 
             else
             {
-                ButtonStar.IconFont = FontAwesome.Sharp.IconFont.Regular;
+                ButtonStar.IconFont = FontAwesome.Sharp.IconFont.Regular;                                                                                                                                                                                                                       
             }
         }
 

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -10,23 +9,20 @@ using System.Threading.Tasks;
 
 namespace NPC_File_Explorer
 {
-    public class FileSearch
+    public class FileSearch : IDisposable
     {
         private readonly string _indexPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "file_index.json");
         private readonly string _metadataPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "index_metadata.json");
+        private readonly object _lock = new object();
 
-        private readonly object _indexLock = new object();
         private List<FileEntry> _files = new List<FileEntry>();
         private Dictionary<string, FileEntry> _filesByPath = new Dictionary<string, FileEntry>(StringComparer.OrdinalIgnoreCase);
-
-        // Inverted index for faster searching
         private Dictionary<string, HashSet<string>> _invertedIndex = new Dictionary<string, HashSet<string>>();
 
         private FileSystemWatcher _watcher;
-        private ConcurrentQueue<FileOperation> _operationQueue = new ConcurrentQueue<FileOperation>();
-        private CancellationTokenSource _processingCts;
-        private Task _processingTask;
-
+        private ConcurrentQueue<FileOp> _queue = new ConcurrentQueue<FileOp>();
+        private CancellationTokenSource _cts;
+        private Task _task;
         private IndexMetadata _metadata = new IndexMetadata();
 
         public class FileEntry
@@ -46,81 +42,64 @@ namespace NPC_File_Explorer
             public long TotalSize { get; set; }
         }
 
-        private class FileOperation
+        private class FileOp
         {
-            public enum OpType { Add, Remove, Rename }
-            public OpType Type { get; set; }
+            public int Type { get; set; }
             public string Path { get; set; }
             public string NewPath { get; set; }
-            public DateTime Timestamp { get; set; }
         }
 
         public FileSearch()
         {
-            StartBackgroundProcessor();
-        }
-
-        private void StartBackgroundProcessor()
-        {
-            _processingCts = new CancellationTokenSource();
-            _processingTask = Task.Run(async () => await ProcessQueueAsync(_processingCts.Token));
+            _cts = new CancellationTokenSource();
+            _task = Task.Run(async () => await ProcessQueue(_cts.Token));
         }
 
         public async Task BuildIndexAsync(string rootPath, IProgress<int> progress = null)
         {
             var files = new ConcurrentBag<FileEntry>();
-            var dirs = new ConcurrentStack<string>();
-            dirs.Push(rootPath);
-
-            int processedCount = 0;
+            int count = 0;
             long totalSize = 0;
 
             await Task.Run(() =>
             {
-                var options = new ParallelOptions
-                {
-                    MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1)
-                };
+                var dirs = new ConcurrentStack<string>();
+                dirs.Push(rootPath);
+
+                var options = new ParallelOptions { MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 1) };
 
                 while (dirs.Count > 0)
                 {
                     var batch = new List<string>();
                     while (dirs.TryPop(out string dir) && batch.Count < 100)
-                    {
                         batch.Add(dir);
-                    }
 
                     Parallel.ForEach(batch, options, currentDir =>
                     {
                         try
                         {
-                            foreach (string dir in Directory.GetDirectories(currentDir))
-                            {
+                            foreach (var dir in Directory.GetDirectories(currentDir))
                                 dirs.Push(dir);
-                            }
 
-                            foreach (string file in Directory.GetFiles(currentDir))
+                            foreach (var file in Directory.GetFiles(currentDir))
                             {
                                 try
                                 {
                                     var info = new FileInfo(file);
-                                    var entry = new FileEntry
+                                    files.Add(new FileEntry
                                     {
                                         Name = info.Name,
                                         FullPath = info.FullName,
                                         Size = info.Length,
                                         Modified = info.LastWriteTime,
                                         Extension = info.Extension.ToLowerInvariant()
-                                    };
+                                    });
 
-                                    files.Add(entry);
-                                    Interlocked.Increment(ref processedCount);
+                                    var newCount = Interlocked.Increment(ref count);
                                     Interlocked.Add(ref totalSize, info.Length);
 
-                                    if (processedCount % 1000 == 0)
-                                    {
-                                        progress?.Report(processedCount);
-                                    }
+                                    if (newCount % 1000 == 0)
+                                        progress?.Report(newCount);
                                 }
                                 catch { }
                             }
@@ -129,10 +108,10 @@ namespace NPC_File_Explorer
                     });
                 }
 
-                lock (_indexLock)
+                lock (_lock)
                 {
                     _files = files.ToList();
-                    RebuildInternalStructures();
+                    RebuildAll();
                 }
 
                 _metadata = new IndexMetadata
@@ -158,23 +137,17 @@ namespace NPC_File_Explorer
                 return;
             }
 
-            var updatedFiles = new List<FileEntry>();
-            var removedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var removed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var updated = 0;
 
-            lock (_indexLock)
+            lock (_lock)
             {
-                foreach (var existing in _files.ToList())
+                foreach (var file in _files.ToList())
                 {
-                    if (!File.Exists(existing.FullPath))
-                    {
-                        removedPaths.Add(existing.FullPath);
-                    }
+                    if (!File.Exists(file.FullPath))
+                        removed.Add(file.FullPath);
                 }
-            }
-
-            lock (_indexLock)
-            {
-                _files.RemoveAll(f => removedPaths.Contains(f.FullPath));
+                _files.RemoveAll(f => removed.Contains(f.FullPath));
             }
 
             await Task.Run(() =>
@@ -184,29 +157,27 @@ namespace NPC_File_Explorer
 
                 while (dirs.Count > 0)
                 {
-                    string currentDir = dirs.Pop();
-
+                    var currentDir = dirs.Pop();
                     try
                     {
-                        foreach (string dir in Directory.GetDirectories(currentDir))
+                        foreach (var dir in Directory.GetDirectories(currentDir))
                             dirs.Push(dir);
 
-                        foreach (string file in Directory.GetFiles(currentDir))
+                        foreach (var file in Directory.GetFiles(currentDir))
                         {
                             try
                             {
                                 var info = new FileInfo(file);
-
-                                lock (_indexLock)
+                                lock (_lock)
                                 {
-                                    if (_filesByPath.TryGetValue(file, out var existing))
+                                    if (_filesByPath.TryGetValue(file, out FileEntry existing))
                                     {
                                         if (existing.Modified != info.LastWriteTime || existing.Size != info.Length)
                                         {
                                             existing.Modified = info.LastWriteTime;
                                             existing.Size = info.Length;
                                             existing.Name = info.Name;
-                                            updatedFiles.Add(existing);
+                                            updated++;
                                         }
                                     }
                                     else
@@ -221,7 +192,7 @@ namespace NPC_File_Explorer
                                         };
                                         _files.Add(entry);
                                         _filesByPath[entry.FullPath] = entry;
-                                        updatedFiles.Add(entry);
+                                        updated++;
                                     }
                                 }
                             }
@@ -231,114 +202,13 @@ namespace NPC_File_Explorer
                     catch { }
                 }
 
-                lock (_indexLock)
-                {
-                    RebuildInvertedIndex();
-                }
+                lock (_lock)
+                    RebuildIndex();
 
                 SaveIndex();
             });
 
-            Debug.WriteLine($"Index updated: {updatedFiles.Count} files changed, {removedPaths.Count} files removed");
-        }
-
-        private void RebuildInternalStructures()
-        {
-            _filesByPath.Clear();
-            foreach (var file in _files)
-            {
-                _filesByPath[file.FullPath] = file;
-            }
-
-            RebuildInvertedIndex();
-        }
-
-        private void RebuildInvertedIndex()
-        {
-            _invertedIndex.Clear();
-
-            foreach (var file in _files)
-            {
-                IndexFileTerms(file);
-            }
-        }
-
-        private void IndexFileTerms(FileEntry file)
-        {
-            // Split filename into searchable terms
-            var terms = SplitIntoTerms(file.Name);
-
-            foreach (var term in terms)
-            {
-                if (term.Length < 2) continue;
-
-                if (!_invertedIndex.ContainsKey(term))
-                {
-                    _invertedIndex[term] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                }
-                _invertedIndex[term].Add(file.FullPath);
-            }
-        }
-
-        private void RemoveFileFromInvertedIndex(string fullPath)
-        {
-            foreach (var kvp in _invertedIndex.ToList())
-            {
-                kvp.Value.Remove(fullPath);
-                if (kvp.Value.Count == 0)
-                {
-                    _invertedIndex.Remove(kvp.Key);
-                }
-            }
-        }
-
-        private List<string> SplitIntoTerms(string filename)
-        {
-            var terms = new List<string>();
-            var lower = filename.ToLowerInvariant();
-
-            // Split by common delimiters
-            var parts = lower.Split(new[] { ' ', '_', '-', '.', '(', ')', '[', ']' },
-                StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var part in parts)
-            {
-                terms.Add(part);
-
-                // Add prefixes for autocomplete-style search
-                for (int i = 2; i <= Math.Min(part.Length, 5); i++)
-                {
-                    terms.Add(part.Substring(0, i));
-                }
-            }
-
-            return terms;
-        }
-
-        private void SaveIndex()
-        {
-            try
-            {
-                var json = JsonConvert.SerializeObject(_files, Formatting.None);
-                File.WriteAllText(_indexPath, json);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Error saving index: " + ex.Message);
-            }
-        }
-
-        private void SaveMetadata()
-        {
-            try
-            {
-                var json = JsonConvert.SerializeObject(_metadata, Formatting.Indented);
-                File.WriteAllText(_metadataPath, json);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Error saving metadata: " + ex.Message);
-            }
+            Console.WriteLine($"Index updated: {updated} changed, {removed.Count} removed");
         }
 
         public async Task LoadIndex()
@@ -347,13 +217,11 @@ namespace NPC_File_Explorer
             {
                 await Task.Run(() =>
                 {
-                    if (!File.Exists(_indexPath))
-                        return;
+                    if (!File.Exists(_indexPath)) return;
 
                     var json = File.ReadAllText(_indexPath);
                     _files = JsonConvert.DeserializeObject<List<FileEntry>>(json) ?? new List<FileEntry>();
-
-                    RebuildInternalStructures();
+                    RebuildAll();
 
                     if (File.Exists(_metadataPath))
                     {
@@ -362,267 +230,343 @@ namespace NPC_File_Explorer
                     }
                 });
 
-                Debug.WriteLine($"Loaded {_files.Count} files from index (last indexed: {_metadata.LastFullIndex})");
+                Console.WriteLine($"Loaded {_files.Count} files (last indexed: {_metadata.LastFullIndex})");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Failed to load index: " + ex.Message);
+                Console.WriteLine($"Failed to load index: {ex.Message}");
                 _files = new List<FileEntry>();
             }
         }
-
-        public bool HasIndex() => _files != null && _files.Count > 0;
-
-        public IndexMetadata GetMetadata() => _metadata;
 
         public List<FileEntry> Search(string query, int maxResults = 1000)
         {
             if (string.IsNullOrWhiteSpace(query))
                 return new List<FileEntry>();
 
-            query = query.ToLowerInvariant();
-            var terms = query.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var lower = query.ToLowerInvariant();
+            var terms = lower.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            lock (_indexLock)
+            lock (_lock)
             {
-                // Use inverted index for faster search
-                HashSet<string> candidatePaths = null;
+                HashSet<string> candidates = null;
 
                 foreach (var term in terms)
                 {
-                    if (_invertedIndex.TryGetValue(term, out var paths))
+                    if (_invertedIndex.TryGetValue(term, out HashSet<string> paths))
                     {
-                        if (candidatePaths == null)
+                        if (candidates == null)
                         {
-                            candidatePaths = new HashSet<string>(paths, StringComparer.OrdinalIgnoreCase);
+                            candidates = new HashSet<string>(paths, StringComparer.OrdinalIgnoreCase);
                         }
                         else
                         {
-                            candidatePaths.IntersectWith(paths);
+                            candidates.IntersectWith(paths);
                         }
                     }
                     else
                     {
-                        // If any term has no matches, no results
-                        candidatePaths = new HashSet<string>();
+                        candidates = new HashSet<string>();
                         break;
                     }
                 }
 
-                if (candidatePaths == null || candidatePaths.Count == 0)
+                if (candidates == null || candidates.Count == 0)
                 {
-                    // Fallback to linear search for partial matches
                     return _files
-                        .Where(f => f.Name.ToLowerInvariant().Contains(query))
-                        .OrderByDescending(f => CalculateRelevance(f.Name, query))
+                        .Where(f => f.Name.ToLowerInvariant().Contains(lower))
+                        .OrderByDescending(f => Score(f.Name, lower))
                         .Take(maxResults)
                         .ToList();
                 }
 
-                // Get files from candidate paths and rank them
-                return candidatePaths
-                    .Select(path => _filesByPath.TryGetValue(path, out var file) ? file : null)
-                    .Where(f => f != null)
-                    .OrderByDescending(f => CalculateRelevance(f.Name, query))
+                var results = new List<FileEntry>();
+                foreach (var path in candidates)
+                {
+                    FileEntry file;
+                    if (_filesByPath.TryGetValue(path, out file))
+                        results.Add(file);
+                }
+
+                return results
+                    .OrderByDescending(f => Score(f.Name, lower))
                     .Take(maxResults)
                     .ToList();
             }
         }
 
-        private int CalculateRelevance(string filename, string query)
-        {
-            int score = 0;
-            var lowerFilename = filename.ToLowerInvariant();
-            var lowerQuery = query.ToLowerInvariant();
-
-            // Exact match
-            if (lowerFilename == lowerQuery)
-                score += 1000;
-
-            // Starts with query
-            if (lowerFilename.StartsWith(lowerQuery))
-                score += 500;
-
-            // Word boundary match
-            if (lowerFilename.StartsWith(lowerQuery + " ") ||
-                lowerFilename.Contains(" " + lowerQuery))
-                score += 300;
-
-            // Contains query
-            if (lowerFilename.Contains(lowerQuery))
-                score += 100;
-
-            // Shorter filenames rank higher (more specific)
-            score -= filename.Length / 10;
-
-            return score;
-        }
-
-        public void SetupFileWatcher(string folderPath)
+        public void SetupFileWatcher(string path)
         {
             try
             {
-                _watcher?.Dispose();
+                if (_watcher != null)
+                {
+                    _watcher.Dispose();
+                    _watcher = null;
+                }
 
-                _watcher = new FileSystemWatcher(folderPath)
+                _watcher = new FileSystemWatcher(path)
                 {
                     IncludeSubdirectories = true,
                     EnableRaisingEvents = true,
                     NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size
                 };
 
-                _watcher.Created += (s, e) => QueueOperation(FileOperation.OpType.Add, e.FullPath);
-                _watcher.Deleted += (s, e) => QueueOperation(FileOperation.OpType.Remove, e.FullPath);
-                _watcher.Changed += (s, e) => QueueOperation(FileOperation.OpType.Add, e.FullPath);
-                _watcher.Renamed += (s, e) => QueueOperation(FileOperation.OpType.Rename, e.OldFullPath, e.FullPath);
+                _watcher.Created += (s, e) => Queue(0, e.FullPath, null);
+                _watcher.Deleted += (s, e) => Queue(1, e.FullPath, null);
+                _watcher.Changed += (s, e) => Queue(0, e.FullPath, null);
+                _watcher.Renamed += (s, e) => Queue(2, e.OldFullPath, e.FullPath);
 
-                Debug.WriteLine($"File watcher started on: {folderPath}");
+                Console.WriteLine($"File watcher started on: {path}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Watcher setup failed: " + ex.Message);
+                Console.WriteLine($"Watcher setup failed: {ex.Message}");
             }
         }
 
-        private void QueueOperation(FileOperation.OpType type, string path, string newPath = null)
+        public bool HasIndex()
         {
-            _operationQueue.Enqueue(new FileOperation
-            {
-                Type = type,
-                Path = path,
-                NewPath = newPath,
-                Timestamp = DateTime.Now
-            });
+            return _files != null && _files.Count > 0;
         }
 
-        private async Task ProcessQueueAsync(CancellationToken cancellationToken)
+        public IndexMetadata GetMetadata()
         {
-            var batch = new List<FileOperation>();
+            return _metadata;
+        }
 
-            while (!cancellationToken.IsCancellationRequested)
+        public void Dispose()
+        {
+            if (_cts != null)
+                _cts.Cancel();
+
+            if (_task != null)
+                _task.Wait(TimeSpan.FromSeconds(2));
+
+            if (_watcher != null)
+                _watcher.Dispose();
+
+            if (_cts != null)
+                _cts.Dispose();
+        }
+
+        private void RebuildAll()
+        {
+            _filesByPath.Clear();
+            foreach (var file in _files)
+                _filesByPath[file.FullPath] = file;
+
+            RebuildIndex();
+        }
+
+        private void RebuildIndex()
+        {
+            _invertedIndex.Clear();
+
+            foreach (var file in _files)
+                AddToIndex(file);
+        }
+
+        private void AddToIndex(FileEntry file)
+        {
+            var terms = GetTerms(file.Name);
+
+            foreach (var term in terms)
+            {
+                if (term.Length < 2) continue;
+
+                if (!_invertedIndex.ContainsKey(term))
+                    _invertedIndex[term] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                _invertedIndex[term].Add(file.FullPath);
+            }
+        }
+
+        private void RemoveFromIndex(string path)
+        {
+            foreach (var kvp in _invertedIndex.ToList())
+            {
+                kvp.Value.Remove(path);
+                if (kvp.Value.Count == 0)
+                    _invertedIndex.Remove(kvp.Key);
+            }
+        }
+
+        private List<string> GetTerms(string filename)
+        {
+            var terms = new List<string>();
+            var parts = filename.ToLowerInvariant()
+                .Split(new[] { ' ', '_', '-', '.', '(', ')', '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var part in parts)
+            {
+                terms.Add(part);
+
+                for (int i = 2; i <= Math.Min(part.Length, 5); i++)
+                    terms.Add(part.Substring(0, i));
+            }
+
+            return terms;
+        }
+
+        private int Score(string filename, string query)
+        {
+            var lower = filename.ToLowerInvariant();
+            int score = 0;
+
+            if (lower == query) score += 1000;
+            if (lower.StartsWith(query)) score += 500;
+            if (lower.StartsWith(query + " ") || lower.Contains(" " + query)) score += 300;
+            if (lower.Contains(query)) score += 100;
+
+            score -= filename.Length / 10;
+            return score;
+        }
+
+        private void SaveIndex()
+        {
+            try
+            {
+                File.WriteAllText(_indexPath, JsonConvert.SerializeObject(_files, Formatting.None));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving index: {ex.Message}");
+            }
+        }
+
+        private void SaveMetadata()
+        {
+            try
+            {
+                File.WriteAllText(_metadataPath, JsonConvert.SerializeObject(_metadata, Formatting.Indented));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving metadata: {ex.Message}");
+            }
+        }
+
+        private void Queue(int type, string path, string newPath)
+        {
+            _queue.Enqueue(new FileOp { Type = type, Path = path, NewPath = newPath });
+        }
+
+        private async Task ProcessQueue(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
             {
                 try
                 {
-                    await Task.Delay(1000, cancellationToken);
+                    await Task.Delay(1000, token);
 
-                    batch.Clear();
-                    while (_operationQueue.TryDequeue(out var op) && batch.Count < 100)
-                    {
+                    var batch = new List<FileOp>();
+                    while (_queue.TryDequeue(out FileOp op) && batch.Count < 100)
                         batch.Add(op);
-                    }
 
-                    if (batch.Count == 0)
-                        continue;
-
-                    await Task.Run(() => ProcessBatch(batch), cancellationToken);
+                    if (batch.Count > 0)
+                        await Task.Run(() => ProcessBatch(batch), token);
                 }
-                catch (TaskCanceledException)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Queue processing error: {ex.Message}");
-                }
+                catch (TaskCanceledException) { break; }
+                catch (Exception ex) { Console.WriteLine($"Queue processing error: {ex.Message}"); }
             }
         }
 
-        private void ProcessBatch(List<FileOperation> operations)
+        private void ProcessBatch(List<FileOp> ops)
         {
-            bool indexChanged = false;
+            bool changed = false;
 
-            lock (_indexLock)
+            lock (_lock)
             {
-                foreach (var op in operations)
+                foreach (var op in ops)
                 {
                     try
                     {
-                        switch (op.Type)
-                        {
-                            case FileOperation.OpType.Add:
-                                if (File.Exists(op.Path))
-                                {
-                                    var info = new FileInfo(op.Path);
-                                    var entry = new FileEntry
-                                    {
-                                        Name = info.Name,
-                                        FullPath = info.FullName,
-                                        Size = info.Length,
-                                        Modified = info.LastWriteTime,
-                                        Extension = info.Extension.ToLowerInvariant()
-                                    };
-
-
-                                    if (_filesByPath.TryGetValue(op.Path, out var existing))
-                                    {
-                                        _files.Remove(existing);
-                                        RemoveFileFromInvertedIndex(op.Path);
-                                    }
-
-                                    _files.Add(entry);
-                                    _filesByPath[entry.FullPath] = entry;
-                                    IndexFileTerms(entry);
-                                    indexChanged = true;
-                                }
-                                break;
-
-                            case FileOperation.OpType.Remove:
-                                if (_filesByPath.TryGetValue(op.Path, out var toRemove))
-                                {
-                                    _files.Remove(toRemove);
-                                    _filesByPath.Remove(op.Path);
-                                    RemoveFileFromInvertedIndex(op.Path);
-                                    indexChanged = true;
-                                }
-                                break;
-
-                            case FileOperation.OpType.Rename:
-                                if (_filesByPath.TryGetValue(op.Path, out var toRename))
-                                {
-                                    _files.Remove(toRename);
-                                    _filesByPath.Remove(op.Path);
-                                    RemoveFileFromInvertedIndex(op.Path);
-
-                                    if (File.Exists(op.NewPath))
-                                    {
-                                        var info = new FileInfo(op.NewPath);
-                                        var entry = new FileEntry
-                                        {
-                                            Name = info.Name,
-                                            FullPath = info.FullName,
-                                            Size = info.Length,
-                                            Modified = info.LastWriteTime,
-                                            Extension = info.Extension.ToLowerInvariant()
-                                        };
-
-                                        _files.Add(entry);
-                                        _filesByPath[entry.FullPath] = entry;
-                                        IndexFileTerms(entry);
-                                    }
-                                    indexChanged = true;
-                                }
-                                break;
-                        }
+                        if (op.Type == 0)
+                            changed |= ProcessAdd(op.Path);
+                        else if (op.Type == 1)
+                            changed |= ProcessRemove(op.Path);
+                        else if (op.Type == 2)
+                            changed |= ProcessRename(op.Path, op.NewPath);
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine($"Error processing operation: {ex.Message}");
+                        Console.WriteLine($"Error processing operation: {ex.Message}");
                     }
                 }
             }
 
-            if (indexChanged)
+            if (changed)
             {
                 SaveIndex();
-                Debug.WriteLine($"Processed batch of {operations.Count} operations");
+                Console.WriteLine($"Processed batch of {ops.Count} operations");
             }
         }
-        public void Dispose()
+
+        private bool ProcessAdd(string path)
         {
-            _processingCts?.Cancel();
-            _processingTask?.Wait(TimeSpan.FromSeconds(2));
-            _watcher?.Dispose();
-            _processingCts?.Dispose();
+            if (!File.Exists(path)) return false;
+
+            var info = new FileInfo(path);
+            var entry = new FileEntry
+            {
+                Name = info.Name,
+                FullPath = info.FullName,
+                Size = info.Length,
+                Modified = info.LastWriteTime,
+                Extension = info.Extension.ToLowerInvariant()
+            };
+
+            if (_filesByPath.TryGetValue(path, out FileEntry existing))
+            {
+                _files.Remove(existing);
+                RemoveFromIndex(path);
+            }
+
+            _files.Add(entry);
+            _filesByPath[entry.FullPath] = entry;
+            AddToIndex(entry);
+            return true;
+        }
+
+        private bool ProcessRemove(string path)
+        {
+            if (!_filesByPath.TryGetValue(path, out FileEntry file))
+                return false;
+
+            _files.Remove(file);
+            _filesByPath.Remove(path);
+            RemoveFromIndex(path);
+            return true;
+        }
+
+        private bool ProcessRename(string oldPath, string newPath)
+        {
+            if (!_filesByPath.TryGetValue(oldPath, out FileEntry file))
+                return false;
+
+            _files.Remove(file);
+            _filesByPath.Remove(oldPath);
+            RemoveFromIndex(oldPath);
+
+            if (File.Exists(newPath))
+            {
+                var info = new FileInfo(newPath);
+                var entry = new FileEntry
+                {
+                    Name = info.Name,
+                    FullPath = info.FullName,
+                    Size = info.Length,
+                    Modified = info.LastWriteTime,
+                    Extension = info.Extension.ToLowerInvariant()
+                };
+
+                _files.Add(entry);
+                _filesByPath[entry.FullPath] = entry;
+                AddToIndex(entry);
+            }
+
+            return true;
         }
     }
 }
