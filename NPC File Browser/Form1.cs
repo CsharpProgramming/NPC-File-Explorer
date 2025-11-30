@@ -306,10 +306,17 @@ namespace NPC_File_Browser
             FileControl FC = new FileControl(isFile, fileName, fileSize, fileExtension);
             FC.FolderPath = fullPath;
             FC.FileClicked += UpdateItems_FileClicked;
+            FC.DisplayMessage += DisplayMessage;
             FC.FileDoubleClicked += UpdateItems_FileDoubleClicked;
             ContentPanel.Controls.Add(FC);
             _fileControls[fullPath] = FC;
             return FC;
+        }
+
+        private async void DisplayMessage(object sender, string message)
+        {
+            ItemCountLabel.Text = itemCount + " Items | Copied directory";
+            System.Media.SystemSounds.Beep.Play();
         }
 
         private void UpdateItems_FileClicked(object sender, string directory)

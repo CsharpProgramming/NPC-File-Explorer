@@ -14,6 +14,7 @@ namespace NPC_File_Browser
     {
         public event EventHandler<string> FileClicked;
         public event EventHandler<string> FileDoubleClicked;
+        public event EventHandler<string> DisplayMessage;
         public string FolderPath { get; set; }
         public bool IsSelected { get; private set; } = false;
 
@@ -33,7 +34,6 @@ namespace NPC_File_Browser
             FileNameLabel.Text = Helper.Helper.TruncateFilename(fileName);
             FileExtensionLabel.Text = fileExtension;
             FileSizeLabel.Text = fileSize;
-            this.Click += FileControl_Click;
         }
 
         public void UpdateSize(string newSize)
@@ -47,11 +47,6 @@ namespace NPC_File_Browser
             FileSizeLabel.Text = newSize;
         }
 
-        private void FileControl_Click(object sender, EventArgs e)
-        {
-            Select();
-            FileClicked?.Invoke(this, FolderPath);
-        }
 
         public void Select()
         {
@@ -68,6 +63,21 @@ namespace NPC_File_Browser
         private void FileControl_DoubleClick(object sender, EventArgs e)
         {
             FileDoubleClicked?.Invoke(this, FolderPath);
+        }
+
+        private void FileControl_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                Clipboard.SetText(FolderPath);
+                DisplayMessage?.Invoke(this, FolderPath);
+            }
+
+            else if (e.Button == MouseButtons.Left)
+            {
+                Select();
+                FileClicked?.Invoke(this, FolderPath);
+            }
         }
     }
 }

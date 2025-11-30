@@ -96,8 +96,8 @@ namespace NPC_File_Browser
             this.Controls.Add(this.Icon);
             this.Name = "FileControl";
             this.Size = new System.Drawing.Size(609, 25);
-            this.Click += new System.EventHandler(this.FileControl_Click);
             this.DoubleClick += new System.EventHandler(this.FileControl_DoubleClick);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.FileControl_MouseClick);
             ((System.ComponentModel.ISupportInitialize)(this.Icon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
