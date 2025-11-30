@@ -29,6 +29,7 @@ namespace NPC_File_Browser
         string LastPathClicked;
         string PinnedFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Browser", "pinned_folders.txt");
         int itemCount = 0;
+        bool CutMode = false;
 
         private CancellationTokenSource _loadCancellationTokenSource;
         private readonly Dictionary<string, FileControl> _fileControls = new Dictionary<string, FileControl>();
@@ -487,6 +488,11 @@ namespace NPC_File_Browser
                         {
                             Helper.Helper.CopyDirectory(path, System.IO.Path.Combine(directory, System.IO.Path.GetFileName(path)));
                         }
+
+                        if (CutMode)
+                        {
+                            DeleteDirectories(new List<string> { path });
+                        }
                     }
 
                     catch (Exception ex)
@@ -495,6 +501,7 @@ namespace NPC_File_Browser
                     }
                 }
             }
+            CutMode = false;
         }
 
         private void DeleteDirectories(List<string> directories)
@@ -543,15 +550,18 @@ namespace NPC_File_Browser
             await LoadItemsAsync(CurrentPath);
         }
 
-        private void ButtonCut_Click(object sender, EventArgs e)
+        private async void ButtonCut_Click(object sender, EventArgs e)
         {
-            //Coming in 1.3.0!
+            CopyDirectories(PathsClicked);
+            CutMode = true;
         }
 
         private void EnableUI()
         {
             ButtonCopy.Enabled = true;
             ButtonCopy.IconColor = Color.White;
+            ButtonCut.Enabled = true;
+            ButtonCut.IconColor = Color.White;
             ButtonDelete.Enabled = true;
             ButtonDelete.IconColor = Color.White;
         }
@@ -560,6 +570,8 @@ namespace NPC_File_Browser
         {
             ButtonCopy.Enabled = false;
             ButtonCopy.IconColor = Color.Gray;
+            ButtonCut.Enabled = false;
+            ButtonCut.IconColor = Color.Gray;
             ButtonDelete.Enabled = false;
             ButtonDelete.IconColor = Color.Gray;
         }
