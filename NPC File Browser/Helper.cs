@@ -175,7 +175,7 @@ namespace NPC_File_Browser.Helper
 
         public static string TruncateFilename(string name)
         {
-            int max = 60;
+            int max = 55;
 
             if (name.Length <= max)
             {

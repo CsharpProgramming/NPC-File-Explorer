@@ -1,4 +1,5 @@
-﻿using NPC_File_Browser.Properties;
+﻿using FontAwesome.Sharp;
+using NPC_File_Browser.Properties;
 using NPC_File_Explorer;
 using System;
 using System.Collections.Generic;
@@ -359,6 +360,11 @@ namespace NPC_File_Browser
 
         private async void ButtonReturn_Click(object sender, EventArgs e)
         {
+            Return();
+        }
+
+        private async void Return()
+        {
             if (CurrentPath.Length > 3)
             {
                 await LoadItemsAsync(Directory.GetParent(CurrentPath).FullName);
@@ -386,6 +392,16 @@ namespace NPC_File_Browser
                 ButtonStar.IconFont = FontAwesome.Sharp.IconFont.Regular;
                 ItemCountLabel.Text = itemCount + " Items";
                 DisableUI(); 
+            }
+
+            if (e.KeyCode == Keys.F5)
+            {
+                RefreshView();
+            }
+
+            if (e.KeyCode == Keys.Home)
+            {
+                await LoadItemsAsync(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
             }
 
             if (e.KeyCode == Keys.Enter)
@@ -582,6 +598,11 @@ namespace NPC_File_Browser
         }
 
         private async void ButtonRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshView();
+        }
+
+        private async void RefreshView()
         {
             PathsClicked.Clear();
             DisableUI();
