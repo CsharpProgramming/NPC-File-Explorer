@@ -97,6 +97,11 @@ namespace NPC_File_Browser.Helper
                     {
                         continue;
                     }
+
+                    catch
+                    {
+                        continue;
+                    }
                 }
             }
 

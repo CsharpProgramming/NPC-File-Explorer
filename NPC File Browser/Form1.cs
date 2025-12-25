@@ -12,7 +12,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Media.Animation;
 
 namespace NPC_File_Browser
 {
@@ -27,10 +26,13 @@ namespace NPC_File_Browser
         static extern int DwmSetWindowAttribute(IntPtr hwnd, DwmWindowAttribute attr, ref int attrValue, int attrSize);
 
         List<string> PathsClicked = new List<string>();
-        string CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads";
+        List<string> LastFoldersOpened = new List<string>();
         string LastPathClicked;
-        string PinnedFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Browser", "pinned_folders.txt");
+        string CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads";
+        string PinnedFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Explorer", "pinned_folders.txt");
+        string RecentFoldersPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Explorer", "recent_folders.txt");
         int itemCount = 0;
+        int MaxRecentFolders = 5;
         bool CutMode = false;
 
         private CancellationTokenSource _loadCancellationTokenSource;
@@ -72,6 +74,7 @@ namespace NPC_File_Browser
         {
             await LoadItemsAsync(CurrentPath);
             PathTextbox.TextBoxText = CurrentPath;
+            LoadRecentFolders();
             LoadSidebar();
             EnableControlDarkMode(ContentPanel);
             EnableControlDarkMode(this);
@@ -84,7 +87,7 @@ namespace NPC_File_Browser
                 await _fileSearch.BuildIndexAsync(rootPath);
                 ItemCountLabel.Text = ItemCountLabel.Text.Replace(" | Building Search Index", " | Index built");
             }
-            
+
             else //Start file watcher for updating the index
             {
                 SearchTextbox.RemovePlaceholder(sender, e);
@@ -94,6 +97,17 @@ namespace NPC_File_Browser
             }
 
             _indexLoaded = true;
+        }
+
+        private void LoadRecentFolders()
+        {
+            foreach (string path in File.ReadAllLines(RecentFoldersPath))
+            {
+                if (Directory.Exists(path))
+                {
+                    LastFoldersOpened.Add(path);
+                }
+            }
         }
 
         private async void DisplaySearchResults(List<FileSearch.FileEntry> results)
@@ -349,6 +363,12 @@ namespace NPC_File_Browser
         {
             if (Directory.Exists(directory))
             {
+                if (LastFoldersOpened.Count == MaxRecentFolders)
+                {
+                    LastFoldersOpened.RemoveAt(0);
+                }
+                LastFoldersOpened.Add(directory);
+                LoadSidebar();
                 await LoadItemsAsync(directory);
                 DisableUI();
                 PathsClicked.Clear();
@@ -398,7 +418,7 @@ namespace NPC_File_Browser
                 PathsClicked.Clear();
                 ButtonStar.IconFont = FontAwesome.Sharp.IconFont.Regular;
                 ItemCountLabel.Text = itemCount + " Items";
-                DisableUI(); 
+                DisableUI();
             }
 
             if (e.KeyCode == Keys.F5)
@@ -627,6 +647,7 @@ namespace NPC_File_Browser
         {
             SidebarPanel.Controls.Clear();
 
+            //Popular folders
             AddSidebarFile("Desktop", Environment.GetFolderPath(Environment.SpecialFolder.Desktop), FontAwesome.Sharp.IconChar.Desktop);
             AddSidebarFile("Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads", FontAwesome.Sharp.IconChar.Download);
             AddSidebarFile("Documents", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), FontAwesome.Sharp.IconChar.FilePdf);
@@ -634,7 +655,8 @@ namespace NPC_File_Browser
 
             AddSideBarSeperator();
 
-            try
+            //Drives
+            try 
             {
                 foreach (DriveInfo drive in DriveInfo.GetDrives())
                 {
@@ -643,10 +665,12 @@ namespace NPC_File_Browser
             }
             catch { }
 
-            AddSideBarSeperator();
-
-            if (File.Exists(PinnedFilePath))
+            //Pinned folders
+            if (File.Exists(PinnedFilePath) && File.ReadAllLines(PinnedFilePath).Length > 0)
             {
+                AddSideBarSeperator();
+                AddSideBarLabel("Pinned Folders");
+
                 foreach (string path in File.ReadAllLines(PinnedFilePath))
                 {
                     if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path))
@@ -655,6 +679,27 @@ namespace NPC_File_Browser
                         if (string.IsNullOrEmpty(folderName))
                         {
                             folderName = path;
+                        }
+
+                        AddSidebarFile(folderName, path, FontAwesome.Sharp.IconChar.Folder);
+                    }
+                }
+            }
+
+            //Recent folders
+            if (LastFoldersOpened.Count > 0)
+            {
+                AddSideBarSeperator();
+                AddSideBarLabel("Recent Folders");
+
+                foreach (string path in LastFoldersOpened)
+                {
+                    if (Directory.Exists(path))
+                    {
+                        string folderName = System.IO.Path.GetFileName(path);
+                        if (string.IsNullOrEmpty(folderName))
+                        {
+                            folderName = "FOLDER NAME MISSING";
                         }
 
                         AddSidebarFile(folderName, path, FontAwesome.Sharp.IconChar.Folder);
@@ -693,6 +738,23 @@ namespace NPC_File_Browser
             SidebarPanel.Controls.Add(panel1);
             SidebarPanel.Controls.Add(panel2);
             SidebarPanel.Controls.Add(panel3);
+        }
+
+        private void AddSideBarLabel(string labelText)
+        {
+            Label label = new Label();
+            label.Size = new Size(236, 20);
+            label.TextAlign = ContentAlignment.MiddleLeft;
+            label.Text = labelText;
+            label.Font = new Font("Segoe UI", 10, System.Drawing.FontStyle.Bold);
+            label.ForeColor = Color.White;
+
+            Panel panel = new Panel();
+            panel.Size = new Size(236, 2);
+            panel.BackColor = Color.Transparent;
+
+            SidebarPanel.Controls.Add(label);
+            SidebarPanel.Controls.Add(panel);
         }
 
         private void AddPinnedFolder(string folderPath)
@@ -746,6 +808,13 @@ namespace NPC_File_Browser
             _loadCancellationTokenSource?.Cancel();
             _loadCancellationTokenSource?.Dispose();
             _fileSearch?.Dispose();
+
+            File.WriteAllText(RecentFoldersPath, String.Empty);
+            foreach (string path in LastFoldersOpened)
+            {
+                File.AppendAllText(RecentFoldersPath, path + Environment.NewLine);
+            }
+
             base.OnFormClosed(e);
         }
 
@@ -765,10 +834,10 @@ namespace NPC_File_Browser
 
         private async void RenameItem()
         {
-            string NewName = Microsoft.VisualBasic.Interaction.InputBox("Enter new file name", "Enter new name", Path.GetFileName(LastPathClicked), 0, 0);
+            string NewName = Microsoft.VisualBasic.Interaction.InputBox("Enter new file name", "Enter new name", Path.GetFileName(LastPathClicked), (Convert.ToInt32(System.Windows.SystemParameters.FullPrimaryScreenWidth) - 354) / 2, (Convert.ToInt32(System.Windows.SystemParameters.FullPrimaryScreenHeight) - 152) / 2);
             string NewPath = Path.Combine(Path.GetDirectoryName(LastPathClicked), NewName);
 
-            if (NewName == null)
+            if (NewName == "" || NewName == Path.GetFileName(LastPathClicked))
             {
                 return;
             }
