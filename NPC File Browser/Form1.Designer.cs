@@ -33,8 +33,6 @@
             this.ItemCountLabel = new System.Windows.Forms.Label();
             this.SidebarPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.SearchTextbox = new NPC_File_Browser.Controls.ModernTextBox();
-            this.PathTextbox = new NPC_File_Browser.Controls.ModernTextBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel7 = new System.Windows.Forms.Panel();
             this.panel8 = new System.Windows.Forms.Panel();
@@ -54,6 +52,8 @@
             this.ButtonBack = new FontAwesome.Sharp.IconPictureBox();
             this.ButtonReturn = new FontAwesome.Sharp.IconPictureBox();
             this.ContentPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.SearchTextbox = new NPC_File_Browser.Controls.ModernTextBox();
+            this.PathTextbox = new NPC_File_Browser.Controls.ModernTextBox();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -116,40 +116,6 @@
             this.panel2.Size = new System.Drawing.Size(1234, 54);
             this.panel2.TabIndex = 1;
             // 
-            // SearchTextbox
-            // 
-            this.SearchTextbox.BackColor = System.Drawing.Color.Transparent;
-            this.SearchTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.SearchTextbox.BorderColor = System.Drawing.Color.Transparent;
-            this.SearchTextbox.BorderRadius = 10;
-            this.SearchTextbox.Location = new System.Drawing.Point(997, 9);
-            this.SearchTextbox.Multiline = false;
-            this.SearchTextbox.Name = "SearchTextbox";
-            this.SearchTextbox.Padding = new System.Windows.Forms.Padding(10);
-            this.SearchTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
-            this.SearchTextbox.PlaceholderText = "Loading index...";
-            this.SearchTextbox.Size = new System.Drawing.Size(227, 36);
-            this.SearchTextbox.TabIndex = 101;
-            this.SearchTextbox.TextBoxText = "";
-            this.SearchTextbox.TextColor = System.Drawing.Color.White;
-            // 
-            // PathTextbox
-            // 
-            this.PathTextbox.BackColor = System.Drawing.Color.Transparent;
-            this.PathTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
-            this.PathTextbox.BorderColor = System.Drawing.Color.Transparent;
-            this.PathTextbox.BorderRadius = 10;
-            this.PathTextbox.Location = new System.Drawing.Point(260, 9);
-            this.PathTextbox.Multiline = false;
-            this.PathTextbox.Name = "PathTextbox";
-            this.PathTextbox.Padding = new System.Windows.Forms.Padding(10);
-            this.PathTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
-            this.PathTextbox.PlaceholderText = "Path...";
-            this.PathTextbox.Size = new System.Drawing.Size(729, 36);
-            this.PathTextbox.TabIndex = 100;
-            this.PathTextbox.TextBoxText = "";
-            this.PathTextbox.TextColor = System.Drawing.Color.White;
-            // 
             // panel3
             // 
             this.panel3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -179,7 +145,7 @@
             this.panel7.Controls.Add(this.panel8);
             this.panel7.Controls.Add(this.iconPictureBox2);
             this.panel7.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.panel7.Location = new System.Drawing.Point(86, 6);
+            this.panel7.Location = new System.Drawing.Point(35, 6);
             this.panel7.Name = "panel7";
             this.panel7.Size = new System.Drawing.Size(1, 28);
             this.panel7.TabIndex = 16;
@@ -213,7 +179,7 @@
             this.panel5.Controls.Add(this.panel6);
             this.panel5.Controls.Add(this.iconPictureBox1);
             this.panel5.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.panel5.Location = new System.Drawing.Point(236, 6);
+            this.panel5.Location = new System.Drawing.Point(185, 6);
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(1, 28);
             this.panel5.TabIndex = 11;
@@ -248,7 +214,7 @@
             this.ButtonRefresh.IconColor = System.Drawing.Color.White;
             this.ButtonRefresh.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonRefresh.IconSize = 23;
-            this.ButtonRefresh.Location = new System.Drawing.Point(94, 6);
+            this.ButtonRefresh.Location = new System.Drawing.Point(43, 6);
             this.ButtonRefresh.Name = "ButtonRefresh";
             this.ButtonRefresh.Size = new System.Drawing.Size(23, 28);
             this.ButtonRefresh.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -264,7 +230,7 @@
             this.ButtonRename.IconColor = System.Drawing.Color.Gray;
             this.ButtonRename.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonRename.IconSize = 23;
-            this.ButtonRename.Location = new System.Drawing.Point(267, 6);
+            this.ButtonRename.Location = new System.Drawing.Point(219, 6);
             this.ButtonRename.Name = "ButtonRename";
             this.ButtonRename.Size = new System.Drawing.Size(23, 28);
             this.ButtonRename.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -279,7 +245,7 @@
             this.ButtonStar.IconColor = System.Drawing.Color.White;
             this.ButtonStar.IconFont = FontAwesome.Sharp.IconFont.Regular;
             this.ButtonStar.IconSize = 23;
-            this.ButtonStar.Location = new System.Drawing.Point(244, 6);
+            this.ButtonStar.Location = new System.Drawing.Point(193, 6);
             this.ButtonStar.Name = "ButtonStar";
             this.ButtonStar.Size = new System.Drawing.Size(23, 28);
             this.ButtonStar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -295,7 +261,7 @@
             this.ButtonCut.IconColor = System.Drawing.Color.Gray;
             this.ButtonCut.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonCut.IconSize = 23;
-            this.ButtonCut.Location = new System.Drawing.Point(205, 6);
+            this.ButtonCut.Location = new System.Drawing.Point(154, 6);
             this.ButtonCut.Name = "ButtonCut";
             this.ButtonCut.Size = new System.Drawing.Size(23, 28);
             this.ButtonCut.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -307,7 +273,7 @@
             // 
             this.panel4.BackColor = System.Drawing.Color.DimGray;
             this.panel4.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.panel4.Location = new System.Drawing.Point(124, 6);
+            this.panel4.Location = new System.Drawing.Point(73, 6);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(1, 28);
             this.panel4.TabIndex = 6;
@@ -320,7 +286,7 @@
             this.ButtonDelete.IconColor = System.Drawing.Color.Gray;
             this.ButtonDelete.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonDelete.IconSize = 23;
-            this.ButtonDelete.Location = new System.Drawing.Point(181, 6);
+            this.ButtonDelete.Location = new System.Drawing.Point(130, 6);
             this.ButtonDelete.Name = "ButtonDelete";
             this.ButtonDelete.Size = new System.Drawing.Size(23, 28);
             this.ButtonDelete.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -336,7 +302,7 @@
             this.ButtonPaste.IconColor = System.Drawing.Color.Gray;
             this.ButtonPaste.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonPaste.IconSize = 23;
-            this.ButtonPaste.Location = new System.Drawing.Point(156, 6);
+            this.ButtonPaste.Location = new System.Drawing.Point(105, 6);
             this.ButtonPaste.Name = "ButtonPaste";
             this.ButtonPaste.Size = new System.Drawing.Size(23, 28);
             this.ButtonPaste.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -353,7 +319,7 @@
             this.ButtonCopy.IconColor = System.Drawing.Color.Gray;
             this.ButtonCopy.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonCopy.IconSize = 23;
-            this.ButtonCopy.Location = new System.Drawing.Point(133, 6);
+            this.ButtonCopy.Location = new System.Drawing.Point(82, 6);
             this.ButtonCopy.Name = "ButtonCopy";
             this.ButtonCopy.Size = new System.Drawing.Size(23, 28);
             this.ButtonCopy.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -369,12 +335,13 @@
             this.ButtonForward.IconColor = System.Drawing.Color.Gray;
             this.ButtonForward.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonForward.IconSize = 23;
-            this.ButtonForward.Location = new System.Drawing.Point(56, 6);
+            this.ButtonForward.Location = new System.Drawing.Point(322, 6);
             this.ButtonForward.Name = "ButtonForward";
             this.ButtonForward.Size = new System.Drawing.Size(23, 28);
             this.ButtonForward.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.ButtonForward.TabIndex = 2;
             this.ButtonForward.TabStop = false;
+            this.ButtonForward.Visible = false;
             // 
             // ButtonBack
             // 
@@ -384,12 +351,13 @@
             this.ButtonBack.IconColor = System.Drawing.Color.Gray;
             this.ButtonBack.IconFont = FontAwesome.Sharp.IconFont.Auto;
             this.ButtonBack.IconSize = 23;
-            this.ButtonBack.Location = new System.Drawing.Point(33, 6);
+            this.ButtonBack.Location = new System.Drawing.Point(299, 6);
             this.ButtonBack.Name = "ButtonBack";
             this.ButtonBack.Size = new System.Drawing.Size(23, 28);
             this.ButtonBack.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.ButtonBack.TabIndex = 1;
             this.ButtonBack.TabStop = false;
+            this.ButtonBack.Visible = false;
             // 
             // ButtonReturn
             // 
@@ -417,6 +385,40 @@
             this.ContentPanel.Size = new System.Drawing.Size(983, 555);
             this.ContentPanel.TabIndex = 3;
             this.ContentPanel.WrapContents = false;
+            // 
+            // SearchTextbox
+            // 
+            this.SearchTextbox.BackColor = System.Drawing.Color.Transparent;
+            this.SearchTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.SearchTextbox.BorderColor = System.Drawing.Color.Transparent;
+            this.SearchTextbox.BorderRadius = 10;
+            this.SearchTextbox.Location = new System.Drawing.Point(997, 9);
+            this.SearchTextbox.Multiline = false;
+            this.SearchTextbox.Name = "SearchTextbox";
+            this.SearchTextbox.Padding = new System.Windows.Forms.Padding(10);
+            this.SearchTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
+            this.SearchTextbox.PlaceholderText = "Loading index...";
+            this.SearchTextbox.Size = new System.Drawing.Size(227, 36);
+            this.SearchTextbox.TabIndex = 101;
+            this.SearchTextbox.TextBoxText = "";
+            this.SearchTextbox.TextColor = System.Drawing.Color.White;
+            // 
+            // PathTextbox
+            // 
+            this.PathTextbox.BackColor = System.Drawing.Color.Transparent;
+            this.PathTextbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(48)))));
+            this.PathTextbox.BorderColor = System.Drawing.Color.Transparent;
+            this.PathTextbox.BorderRadius = 10;
+            this.PathTextbox.Location = new System.Drawing.Point(260, 9);
+            this.PathTextbox.Multiline = false;
+            this.PathTextbox.Name = "PathTextbox";
+            this.PathTextbox.Padding = new System.Windows.Forms.Padding(10);
+            this.PathTextbox.PlaceholderColor = System.Drawing.Color.DimGray;
+            this.PathTextbox.PlaceholderText = "Path...";
+            this.PathTextbox.Size = new System.Drawing.Size(729, 36);
+            this.PathTextbox.TabIndex = 100;
+            this.PathTextbox.TextBoxText = "";
+            this.PathTextbox.TextColor = System.Drawing.Color.White;
             // 
             // Form1
             // 

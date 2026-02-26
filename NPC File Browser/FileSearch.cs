@@ -558,7 +558,7 @@ namespace NPC_File_Explorer
                     FullPath = info.FullName,
                     Size = info.Length,
                     Modified = info.LastWriteTime,
-                    Extension = info.Extension.ToLowerInvariant()
+                    Extension = info.Extension.ToLowerInvariant(),
                 };
 
                 _files.Add(entry);

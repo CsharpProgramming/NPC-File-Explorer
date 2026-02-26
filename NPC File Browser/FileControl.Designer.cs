@@ -34,6 +34,7 @@ namespace NPC_File_Browser
             this.FileNameLabel = new System.Windows.Forms.Label();
             this.FileExtensionLabel = new System.Windows.Forms.Label();
             this.FileSizeLabel = new System.Windows.Forms.Label();
+            this.RenameTextbox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.Icon)).BeginInit();
             this.SuspendLayout();
             // 
@@ -85,11 +86,26 @@ namespace NPC_File_Browser
             this.FileSizeLabel.TabIndex = 3;
             this.FileSizeLabel.Text = "Size";
             // 
+            // RenameTextbox
+            // 
+            this.RenameTextbox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
+            this.RenameTextbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.RenameTextbox.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
+            this.RenameTextbox.ForeColor = System.Drawing.Color.White;
+            this.RenameTextbox.Location = new System.Drawing.Point(84, 4);
+            this.RenameTextbox.Name = "RenameTextbox";
+            this.RenameTextbox.Size = new System.Drawing.Size(241, 18);
+            this.RenameTextbox.TabIndex = 4;
+            this.RenameTextbox.Text = "Name";
+            this.RenameTextbox.Visible = false;
+            this.RenameTextbox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.RenameTextbox_KeyPress);
+            // 
             // FileControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Transparent;
+            this.Controls.Add(this.RenameTextbox);
             this.Controls.Add(this.FileSizeLabel);
             this.Controls.Add(this.FileExtensionLabel);
             this.Controls.Add(this.FileNameLabel);
@@ -97,6 +113,7 @@ namespace NPC_File_Browser
             this.Name = "FileControl";
             this.Size = new System.Drawing.Size(609, 25);
             this.DoubleClick += new System.EventHandler(this.FileControl_DoubleClick);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FileControl_KeyDown);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.FileControl_MouseClick);
             ((System.ComponentModel.ISupportInitialize)(this.Icon)).EndInit();
             this.ResumeLayout(false);
@@ -110,5 +127,6 @@ namespace NPC_File_Browser
         private System.Windows.Forms.Label FileNameLabel;
         private System.Windows.Forms.Label FileExtensionLabel;
         private System.Windows.Forms.Label FileSizeLabel;
+        private TextBox RenameTextbox;
     }
 }

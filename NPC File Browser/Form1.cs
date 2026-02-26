@@ -27,13 +27,16 @@ namespace NPC_File_Browser
 
         List<string> PathsClicked = new List<string>();
         List<string> LastFoldersOpened = new List<string>();
-        string LastPathClicked;
+
         string CurrentPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads";
         string PinnedFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Explorer", "pinned_folders.txt");
         string RecentFoldersPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NPC_File_Explorer", "recent_folders.txt");
         int itemCount = 0;
         int MaxRecentFolders = 5;
         bool CutMode = false;
+
+        string LastPathClicked;
+        FileControl LastUserControlClicked;
 
         private CancellationTokenSource _loadCancellationTokenSource;
         private readonly Dictionary<string, FileControl> _fileControls = new Dictionary<string, FileControl>();
@@ -322,9 +325,33 @@ namespace NPC_File_Browser
             FC.FileClicked += UpdateItems_FileClicked;
             FC.DisplayMessage += DisplayMessage;
             FC.FileDoubleClicked += UpdateItems_FileDoubleClicked;
+            FC.FileRenamed += RenameItem;
             ContentPanel.Controls.Add(FC);
             _fileControls[fullPath] = FC;
             return FC;
+        } 
+
+        private async void RenameItem(object sender, string NewName)
+        {
+            string NewPath = Path.Combine(Path.GetDirectoryName(LastPathClicked), NewName);
+
+            if (Directory.Exists(LastPathClicked))
+            {
+                Directory.Move(LastPathClicked, NewPath);
+            }
+
+            else if (File.Exists(LastPathClicked))
+            {
+                File.Move(LastPathClicked, NewPath);
+            }
+
+            else
+            {
+                MessageBox.Show("File or folder does not exist.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            DisableUI();
+            await LoadItemsAsync(CurrentPath);
         }
 
         private async void DisplayMessage(object sender, string message)
@@ -340,6 +367,7 @@ namespace NPC_File_Browser
                 PathsClicked.Add(directory);
                 ItemCountLabel.Text = itemCount + " Items | " + PathsClicked.Count + " Selected";
                 LastPathClicked = directory;
+                LastUserControlClicked = (FileControl)sender; 
 
                 UpdateStarButton();
                 EnableUI();
@@ -429,11 +457,6 @@ namespace NPC_File_Browser
             if (e.KeyCode == Keys.Home)
             {
                 await LoadItemsAsync(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
-            }
-
-            if (e.KeyCode == Keys.F2 && LastPathClicked != "")
-            {
-                RenameItem();
             }
 
             if (e.KeyCode == Keys.Enter)
@@ -664,7 +687,7 @@ namespace NPC_File_Browser
                 }
             }
             catch { }
-
+                
             //Pinned folders
             if (File.Exists(PinnedFilePath) && File.ReadAllLines(PinnedFilePath).Length > 0)
             {
@@ -708,7 +731,7 @@ namespace NPC_File_Browser
             }
         }
 
-        private void AddSidebarFile(string folderName, string folderPath, FontAwesome.Sharp.IconChar icon)
+        private void AddSidebarFile(string folderName, string folderPath, FontAwesome.Sharp.IconChar icon) 
         {
             SidebarFileControl SFC = new SidebarFileControl(folderName, icon);
             SFC.FolderPath = folderPath;
@@ -770,7 +793,7 @@ namespace NPC_File_Browser
         }
 
         private bool IsPathPinned(string folderPath)
-        {
+        { 
             if (File.Exists(PinnedFilePath))
             {
                 return File.ReadAllLines(PinnedFilePath).Any(path => path.Equals(folderPath, StringComparison.OrdinalIgnoreCase));
@@ -827,38 +850,10 @@ namespace NPC_File_Browser
             Settings.Default.Save();
         }
 
-        private async void ButtonRename_Click(object sender, EventArgs e)
+        private void ButtonRename_Click(object sender, EventArgs e)
         {
-            RenameItem();
-        }
-
-        private async void RenameItem()
-        {
-            string NewName = Microsoft.VisualBasic.Interaction.InputBox("Enter new file name", "Enter new name", Path.GetFileName(LastPathClicked), (Convert.ToInt32(System.Windows.SystemParameters.FullPrimaryScreenWidth) - 354) / 2, (Convert.ToInt32(System.Windows.SystemParameters.FullPrimaryScreenHeight) - 152) / 2);
-            string NewPath = Path.Combine(Path.GetDirectoryName(LastPathClicked), NewName);
-
-            if (NewName == "" || NewName == Path.GetFileName(LastPathClicked))
-            {
-                return;
-            }
-
-            if (Directory.Exists(LastPathClicked))
-            {
-                Directory.Move(LastPathClicked, NewPath);
-            }
-
-            else if (File.Exists(LastPathClicked))
-            {
-                File.Move(LastPathClicked, NewPath);
-            }
-
-            else
-            {
-                MessageBox.Show("File or folder does not exist.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            DisableUI();
-            await LoadItemsAsync(CurrentPath);
+            LastUserControlClicked.ToggleRename();
+            LastUserControlClicked.Focus();
         }
     }
 }
