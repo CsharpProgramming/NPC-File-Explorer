@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace NPC_File_Browser
 {
@@ -123,11 +124,10 @@ namespace NPC_File_Browser
 
             _pendingResults = results;
 
-            // Load first 100 instantly
-            await LoadBatch(0, Math.Min(100, results.Count));
+            await LoadBatch(0, Math.Min(100, results.Count)); // Load first 100 instantly
 
-            // Load rest in background
-            if (results.Count > 100)
+
+            if (results.Count > 100) // Load rest in background
             {
                 _ = LoadRemainingBatches(100);
             }
@@ -461,24 +461,27 @@ namespace NPC_File_Browser
 
             if (e.KeyCode == Keys.Enter)
             {
-                e.SuppressKeyPress = true;
-
-                string input = PathTextbox.TextBoxText.Trim();
-
-                if (_indexLoaded)
+                if (SearchTextbox.TextBoxText != "")
                 {
-                    await RunSearchAsync(SearchTextbox.TextBoxText);
-                    return;
-                }
+                    e.SuppressKeyPress = true;
 
-                if (string.IsNullOrWhiteSpace(input))
-                {
-                    PathTextbox.TextBoxText = CurrentPath;
-                    await LoadItemsAsync(CurrentPath);
-                    return;
-                }
+                    string input = PathTextbox.TextBoxText.Trim();
 
-                MessageBox.Show("Search index not loaded yet! Please build or load it first.", "Index Missing", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (_indexLoaded)
+                    {
+                        await RunSearchAsync(SearchTextbox.TextBoxText);
+                        return;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(input))
+                    {
+                        PathTextbox.TextBoxText = CurrentPath;
+                        await LoadItemsAsync(CurrentPath);
+                        return;
+                    }
+
+                    MessageBox.Show("Search index not loaded yet! Please build or load it first.", "Index Missing", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
 
             if ((ModifierKeys & Keys.Control) == Keys.Control && (ModifierKeys & Keys.Shift) == Keys.Shift && e.KeyCode == Keys.R) //Rebuild index: ctrl+shift+r
@@ -854,6 +857,23 @@ namespace NPC_File_Browser
         {
             LastUserControlClicked.ToggleRename();
             LastUserControlClicked.Focus();
+        }
+
+        private async void PathTextbox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 13) //Detect Enter key
+            {
+                if (Directory.Exists(PathTextbox.TextBoxText))
+                {
+                    await LoadItemsAsync(PathTextbox.TextBoxText);
+                }
+
+                else
+                {
+                    PathTextbox.TextBoxText = CurrentPath;
+                    ItemCountLabel.Text = itemCount + " Items | " + "Entered path does not exist";
+                }
+            }
         }
     }
 }

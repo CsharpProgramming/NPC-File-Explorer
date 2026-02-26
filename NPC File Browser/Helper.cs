@@ -139,7 +139,7 @@ namespace NPC_File_Browser.Helper
 
         public static string ConvertedSize(double bytes, bool rounded)
         {
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            string[] sizes = { "B", "KB", "MB", "GB", "TB", "PB" };
 
             double len = bytes;
             int order = 0;

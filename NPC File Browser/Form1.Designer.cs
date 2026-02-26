@@ -419,6 +419,7 @@
             this.PathTextbox.TabIndex = 100;
             this.PathTextbox.TextBoxText = "";
             this.PathTextbox.TextColor = System.Drawing.Color.White;
+            this.PathTextbox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PathTextbox_KeyPress);
             // 
             // Form1
             // 
@@ -436,7 +437,7 @@
             this.MinimumSize = new System.Drawing.Size(1250, 691);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "NPC File Explorer | v.1.3.0";
+            this.Text = "NPC File Explorer | v.1.4.0";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);

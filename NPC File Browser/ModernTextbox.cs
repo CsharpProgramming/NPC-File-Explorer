@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Drawing.Drawing2D;
-using System.Drawing;
-using System.Windows.Forms;
 using System.ComponentModel;
-
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace NPC_File_Browser.Controls
 {
@@ -12,10 +11,11 @@ namespace NPC_File_Browser.Controls
     {
         private TextBox textBox;
         private bool isPlaceholderActive = true;
+
         public string PlaceholderText { get; set; } = "";
         public Color BorderColor { get; set; } = Color.Gray;
         public int BorderRadius { get; set; } = 10;
-        public Color BackgroundColor { get; set; } = Color.FromArgb(35, 35, 35);
+        public Color BackgroundColor { get; set; } = Color.FromArgb(45, 45, 48);
         public Color TextColor { get; set; } = Color.White;
         public Color PlaceholderColor { get; set; } = Color.DimGray;
 
@@ -30,43 +30,56 @@ namespace NPC_File_Browser.Controls
             }
         }
 
+        // Exposed events (forwarded from inner textBox)
+        [Browsable(true)]
+        [Category("Action")]
+        [Description("Occurs when a key is pressed while focus is on the text box.")]
+        public new event KeyPressEventHandler KeyPress;
+
+        [Browsable(true)]
+        [Category("Action")]
+        public new event EventHandler TextChanged;
+
         public ModernTextBox()
         {
-            this.DoubleBuffered = true;
-            this.BackColor = Color.Transparent;
-            this.Padding = new Padding(10);
-            this.Height = 36;
+            DoubleBuffered = true;
+            BackColor = Color.Transparent;
+            Padding = new Padding(10);
+            Height = 36;
 
             textBox = new TextBox
             {
                 BorderStyle = BorderStyle.None,
-                BackColor = BackgroundColor,
+                BackColor = Color.FromArgb(45, 45, 48),
                 ForeColor = PlaceholderColor,
                 Font = new Font("Segoe UI", 10),
                 Location = new Point(10, 8),
-                Width = this.Width - 20,
+                Width = Width - 20,
                 Text = PlaceholderText
             };
 
+            // Wire internal handlers
             textBox.Enter += RemovePlaceholder;
             textBox.Leave += SetPlaceholder;
-            textBox.TextChanged += (s, e) => { isPlaceholderActive = string.IsNullOrEmpty(textBox.Text); };
+            textBox.KeyPress += TextBox_KeyPress;
+            textBox.TextChanged += TextBox_TextChanged;
 
-            this.Controls.Add(textBox);
-            this.Resize += (s, e) => AdjustTextBox();
+            Controls.Add(textBox);
+            Resize += (s, e) => AdjustTextBox();
         }
+
         private void AdjustTextBox()
         {
-            textBox.Width = this.Width - Padding.Left - Padding.Right;
+            textBox.Width = Width - Padding.Left - Padding.Right;
 
             if (!textBox.Multiline)
             {
                 textBox.Height = TextRenderer.MeasureText("Test", textBox.Font).Height + 2;
-                textBox.Location = new Point(Padding.Left, (this.Height - textBox.Height) / 2);
+                textBox.Location = new Point(Padding.Left, (Height - textBox.Height) / 2);
             }
             else
             {
-                textBox.Height = this.Height - Padding.Top - Padding.Bottom;
+                textBox.Height = Height - Padding.Top - Padding.Bottom;
                 textBox.Location = new Point(Padding.Left, Padding.Top);
             }
         }
@@ -79,6 +92,23 @@ namespace NPC_File_Browser.Controls
                 textBox.ForeColor = TextColor;
                 isPlaceholderActive = false;
             }
+        }
+
+        private void TextBox_TextChanged(object sender, EventArgs e)
+        {
+            isPlaceholderActive = string.IsNullOrEmpty(textBox.Text);
+            TextChanged?.Invoke(this, e);
+        }
+
+        private void TextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter && !textBox.Multiline)
+            {
+                e.Handled = true; // prevent beep
+            }
+
+            Console.WriteLine("ModernTextBox internal KeyPress fired: " + e.KeyChar);
+            KeyPress?.Invoke(this, e);
         }
 
         public void SetPlaceholder(object sender, EventArgs e)
@@ -97,12 +127,13 @@ namespace NPC_File_Browser.Controls
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
             Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
-            var pen = new Pen(Color.DarkGray);
-            var brush = new SolidBrush(Color.FromArgb(35, 35, 35));
-            var bgPath = GetRoundedRect(rect, BorderRadius);
-
-            g.FillPath(brush, bgPath);
-            g.DrawPath(pen, bgPath);
+            using (var pen = new Pen(Color.DarkGray))
+            using (var brush = new SolidBrush(BackgroundColor))
+            {
+                var bgPath = GetRoundedRect(rect, BorderRadius);
+                g.FillPath(brush, bgPath);
+                g.DrawPath(pen, bgPath);
+            }
         }
 
         private GraphicsPath GetRoundedRect(Rectangle bounds, int radius)
@@ -139,6 +170,6 @@ namespace NPC_File_Browser.Controls
         {
             PlaceholderText = placeholder;
             SetPlaceholder(this, EventArgs.Empty);
-        }   
+        }
     }
 }
